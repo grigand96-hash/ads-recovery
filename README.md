@@ -47,6 +47,8 @@ This is a standalone Mac app, not a Safari extension. It stays in the menu bar a
 
 ## Download and install
 
+![Drag Ads Recovery into Applications](docs/assets/installer.png)
+
 **[Open the installation and first-run guide](docs/POST-INSTALL.md)** for step-by-step help with the download, macOS first-launch warning, Safari access, and your first recovery attempt.
 
 Already installed? Jump to [allowing access](docs/POST-INSTALL.md#allow-access-to-safari) or [fixing an access warning after an update](docs/POST-INSTALL.md#access-is-on-but-the-app-still-asks-for-it).
@@ -102,7 +104,7 @@ Requires macOS and Apple Command Line Tools or Xcode. Use Xcode 26 or newer to i
 bash Scripts/build.sh
 ```
 
-The script runs the detector tests, generates the icons, compiles Apple Silicon and Intel slices, packages `build/Ads Recovery.app`, and produces `build/Ads-Recovery-macOS.dmg` with `build/SHA256SUMS.txt`.
+The script runs the detector tests, generates the icons, compiles Apple Silicon and Intel slices, packages `build/Ads Recovery.app`, and produces `build/Ads-Recovery-macOS.zip` with `build/SHA256SUMS.txt`.
 
 For an Apple Silicon-only development build:
 
@@ -116,7 +118,7 @@ No paid Apple Developer account is required for these builds. The app uses an **
 
 The installer is built with `dmgbuild==1.6.5` and `Scripts/package-dmg.sh`. It includes an Applications shortcut and a visual drag-and-drop guide.
 
-The workflow runs on pushes to `main`, version tags, pull requests, and manual dispatch. It uploads a DMG, ZIP, and checksum to the Actions run. It does not automatically publish a GitHub Release, modify the repository, or require signing secrets. Reviewed releases are published separately with the verified ZIP and checksum. Downloaded-build installation still needs testing on a clean Mac.
+The workflow runs on pushes to `main`, version tags, pull requests, and manual dispatch. It uploads a DMG, ZIP, and checksum to the Actions run. It does not automatically publish a GitHub Release, modify the repository, or require signing secrets. Reviewed releases are published separately with the verified DMG, ZIP, and checksum. Downloaded-build installation still needs testing on a clean Mac.
 
 ## Versions
 

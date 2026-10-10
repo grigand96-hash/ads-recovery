@@ -17,6 +17,8 @@ The ZIP download is also available on the release page. If you use it, unpack th
 
 If you open the app from the disk image or Downloads, it shows a visual move guide before requesting permission. Quit that copy, move the app, and reopen it from Applications.
 
+![Drag the app into Applications](assets/installer.png)
+
 ## Open the app
 
 This beta is not notarized by Apple, so macOS may stop it from opening the first time.
@@ -34,7 +36,7 @@ Do not turn off Gatekeeper for the whole Mac. If macOS reports malware or a dama
 
 This is a broad macOS permission to read and control interfaces. Ads Recovery's code limits its checks to the active Safari window and supported Ads Manager pages. It needs this permission to recognize the loading screen and request a reload.
 
-![Ads Recovery welcome screen](assets/onboarding.png)
+![Ads Recovery permission setup](assets/permissions.png)
 
 ## Try your first recovery
 
