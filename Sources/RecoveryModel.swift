@@ -62,6 +62,11 @@ final class RecoveryModel: ObservableObject {
     }
     func activate() {
         suspend(); refreshPermission()
+        guard Installation.currentIsInstalled else {
+            title = "Move Ads Recovery to Applications"
+            detail = "Open the installed copy before setting up Safari access."
+            onUpdate?(); return
+        }
         guard permitted else {
             title = "Safari access needed"
             detail = "macOS has not granted access to this build. If Ads Recovery is already enabled in Settings, open the setup guide to repair its permission."
@@ -90,6 +95,7 @@ final class RecoveryModel: ObservableObject {
         onUpdate?()
     }
     func requestPermission() {
+        guard Installation.currentIsInstalled else { notice = "Move Ads Recovery to Applications, then open that copy before allowing access."; return }
         let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
         _ = AXIsProcessTrustedWithOptions(options)
         if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") { NSWorkspace.shared.open(url) }

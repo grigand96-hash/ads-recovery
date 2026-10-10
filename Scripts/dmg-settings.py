@@ -1,0 +1,20 @@
+from pathlib import Path
+out = Path(defines['out']).resolve()
+files = [str(out / 'Ads Recovery.app')]
+symlinks = {'Applications': '/Applications'}
+format = 'UDZO'
+filesystem = 'HFS+'
+volume_name = 'Ads Recovery'
+background = str(out / 'installer-background.png')
+icon = str(out / 'Ads Recovery.app/Contents/Resources/AppIcon.icns')
+window_rect = ((160, 160), (660, 420))
+icon_locations = {'Ads Recovery.app': (170, 210), 'Applications': (490, 210)}
+icon_size = 88
+text_size = 14
+default_view = 'icon-view'
+show_status_bar = False
+show_toolbar = False
+show_sidebar = False
+show_tab_view = False
+show_pathbar = False
+hide_extensions = ['Ads Recovery.app']

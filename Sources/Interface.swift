@@ -127,11 +127,11 @@ struct HelpRow: View {
 struct OnboardingView: View {
     @ObservedObject var model: RecoveryModel
     let finish: () -> Void
-    @ViewState private var step = 0
+    @ViewState private var step = Installation.currentIsInstalled ? 1 : 0
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 22) {
-                ForEach(Array(["Welcome", "Access", "Ready"].enumerated()), id: \.offset) { index, name in
+                ForEach(Array(["Install", "Safari", "Access", "Ready"].enumerated()), id: \.offset) { index, name in
                     HStack(spacing: 7) {
                         Text(index < step ? "✓" : "\(index + 1)").font(Brand.text(10, .medium))
                             .frame(width: 21, height: 21)
@@ -144,8 +144,9 @@ struct OnboardingView: View {
             }.padding(.bottom, 30)
             ScrollView {
                 Group {
-                    if step == 0 { introduction }
-                    else if step == 1 { permission }
+                    if step == 0 { installation }
+                    else if step == 1 { introduction }
+                    else if step == 2 { permission }
                     else { ready }
                 }.frame(maxWidth: .infinity, alignment: .leading).padding(.top, 8)
             }
@@ -157,15 +158,40 @@ struct OnboardingView: View {
                     Text("Runs locally on your Mac").font(Brand.text(11)).foregroundStyle(Brand.muted)
                 }
                 Spacer()
-                if step == 1 && !model.permitted {
-                    Button("Set up later") { step = 2 }.buttonStyle(.plain).font(Brand.text(12)).foregroundStyle(Brand.muted)
-                    Button("Check access") { model.activate(); if model.permitted { step = 2 } }.buttonStyle(ActionStyle())
+                if step == 0 && !Installation.currentIsInstalled {
+                    Button("Open Applications") { NSWorkspace.shared.open(URL(fileURLWithPath: "/Applications")) }.buttonStyle(ActionStyle())
+                } else if step == 2 && !model.permitted {
+                    Button("Set up later") { finish() }.buttonStyle(.plain).font(Brand.text(12)).foregroundStyle(Brand.muted)
+                    Button("Open System Settings") { model.requestPermission() }.buttonStyle(ActionStyle())
                 } else {
-                    Button(step == 2 ? "Get started" : "Continue") { if step == 2 { finish() } else { step += 1 } }
-                        .buttonStyle(ActionStyle())
+                    Button(step == 3 ? (model.permitted ? "Open Ads Manager" : "Finish setup later") : "Continue") {
+                        if step == 3 { finish(); if model.permitted { model.openAdsManager() } }
+                        else { step += 1 }
+                    }.buttonStyle(ActionStyle())
                 }
             }
         }.padding(30)
+    }
+    private var installation: some View {
+        VStack(alignment: .leading, spacing: 22) {
+            Text(Installation.currentIsInstalled ? "Installed in Applications" : "First, move the app\nto Applications")
+                .font(Brand.text(33)).tracking(-0.9)
+            HStack(spacing: 38) {
+                AssetImage(name: "AppIcon-128").frame(width: 90, height: 90)
+                Image(systemName: "arrow.right").font(.system(size: 28)).foregroundStyle(Brand.muted)
+                Image(systemName: "folder.fill").font(.system(size: 82)).foregroundStyle(Brand.blue)
+            }.frame(maxWidth: .infinity).padding(.vertical, 18).accessibilityLabel("Move Ads Recovery to Applications")
+            if Installation.currentIsInstalled {
+                HelpRow(symbol: "checkmark.circle", title: "This copy is ready", detail: "Continue to set up Safari access.")
+            } else {
+                HelpRow(symbol: "1.circle", title: "Drag Ads Recovery into Applications", detail: "Use the two icons in the installer window. If you downloaded a ZIP, drag the app from Downloads into Applications in Finder.")
+                HelpRow(symbol: "2.circle", title: "Quit this copy, then open the installed app", detail: "Choose Quit below. Open Ads Recovery from Applications before allowing access, so macOS remembers the right copy.")
+                HStack(spacing: 20) {
+                    Button("Show this copy in Finder") { NSWorkspace.shared.activateFileViewerSelecting([Bundle.main.bundleURL]) }.buttonStyle(.link)
+                    Button("Quit Ads Recovery") { NSApp.terminate(nil) }.buttonStyle(.link)
+                }
+            }
+        }
     }
     private var introduction: some View {
         VStack(alignment: .leading, spacing: 27) {
@@ -182,41 +208,49 @@ struct OnboardingView: View {
         }
     }
     private var permission: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Text("One permission\nto work with Safari").font(Brand.text(33)).tracking(-0.9).fixedSize(horizontal: false, vertical: true)
-            Text("The app needs to read window elements and send a reload command. macOS grants broad permission to control the interface for this.")
-                .font(Brand.text(14)).foregroundStyle(Brand.muted).lineSpacing(5).fixedSize(horizontal: false, vertical: true)
-            HStack(spacing: 14) {
-                Image(systemName: model.permitted ? "checkmark.circle.fill" : "lock.shield").font(.system(size: 26)).foregroundStyle(Brand.blue)
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(model.permitted ? "Access granted" : "Device Control and Data Access").font(Brand.text(13, .medium))
-                    Text(model.permitted ? "You can continue to the next step." : "Called Accessibility on older macOS versions.").font(Brand.text(12)).foregroundStyle(Brand.muted)
+        VStack(alignment: .leading, spacing: 18) {
+            Text(model.permitted ? "Safari access is ready" : "Allow access in\nSystem Settings").font(Brand.text(33)).tracking(-0.9)
+            Text("macOS asks for permission to read and control interfaces. Ads Recovery uses it to recognize the loading screen in Safari and request a reload.")
+                .font(Brand.text(14)).foregroundStyle(Brand.muted).lineSpacing(4)
+            VStack(alignment: .leading, spacing: 12) {
+                Label("Privacy & Security", systemImage: "hand.raised").font(Brand.text(12)).foregroundStyle(Brand.muted)
+                Text("Device Control and Data Access").font(Brand.text(16, .medium))
+                Text("Called Accessibility on older macOS versions").font(Brand.text(11)).foregroundStyle(Brand.muted)
+                Divider()
+                HStack(spacing: 12) {
+                    AssetImage(name: "AppIcon-128").frame(width: 34, height: 34)
+                    Text("Ads Recovery").font(Brand.text(14, .medium))
+                    Spacer()
+                    Image(systemName: "switch.2").font(.system(size: 28)).foregroundStyle(Brand.blue)
+                    Text("Turn on").font(Brand.text(12, .medium))
                 }
-            }.padding(18).frame(maxWidth: .infinity, alignment: .leading).background(Color.white).clipShape(RoundedRectangle(cornerRadius: 12))
-            if !model.permitted {
-                Button { model.requestPermission() } label: {
-                    HStack { Text("Open macOS settings"); Image(systemName: "arrow.up.right") }
-                }.buttonStyle(ActionStyle(primary: false))
-                Text("Enable Ads Recovery in the app list, then return here.")
-                    .font(Brand.text(12)).foregroundStyle(Brand.muted)
+                Text("Illustration of the setting to enable").font(Brand.text(10)).foregroundStyle(Brand.muted)
+            }.padding(18).background(Color.white, in: RoundedRectangle(cornerRadius: 12))
+                .accessibilityElement(children: .combine)
+            if model.permitted {
+                Label("Access granted to this copy of Ads Recovery", systemImage: "checkmark.circle.fill")
+                    .font(Brand.text(13, .medium)).foregroundStyle(Brand.blue)
+            } else {
+                Text("1. Open System Settings below.\n2. Turn on Ads Recovery and approve Touch ID or your password.\n3. Return here. We check access automatically.")
+                    .font(Brand.text(13)).lineSpacing(6)
             }
-            DisclosureGroup("Already enabled, but access is still missing?") {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("This beta uses an ad-hoc signature. macOS may keep permission for an older build, even when its switch is on. Remove only the old Ads Recovery entry with the minus button, then add this copy again using the plus button. Approve the macOS prompt and return here. Access is checked automatically.")
-                    Button("Show this copy in Finder") { NSWorkspace.shared.activateFileViewerSelecting([Bundle.main.bundleURL]) }.buttonStyle(.link)
-                    Text("Keep one installed copy in Applications. A later update may need permission again.")
+            DisclosureGroup("App missing, or the switch is already on?") {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Use + in the permission list to add Ads Recovery from Applications. If an older copy is already listed, remove only that entry with −, add this copy, and turn it on again. Updates to this beta may need permission again.")
+                    HStack(spacing: 18) {
+                        Button("Show this copy in Finder") { NSWorkspace.shared.activateFileViewerSelecting([Bundle.main.bundleURL]) }
+                        Button("Check access") { model.activate() }
+                    }.buttonStyle(.link)
                 }.font(Brand.text(12)).foregroundStyle(Brand.muted).lineSpacing(3).padding(.top, 8)
             }.font(Brand.text(12))
-            Text("The app only works with Safari. Page content is never saved or sent. Optional diagnostics use only technical events, with your permission.")
-                .font(Brand.text(12)).foregroundStyle(Brand.muted).lineSpacing(3)
         }
     }
     private var ready: some View {
         VStack(alignment: .leading, spacing: 23) {
-            Text("Back to your\ncampaigns").font(Brand.text(33)).tracking(-0.9).fixedSize(horizontal: false, vertical: true)
+            Text(model.permitted ? "Open your Ads Manager tab" : "Safari access is still needed").font(Brand.text(33)).tracking(-0.9).fixedSize(horizontal: false, vertical: true)
             HelpRow(symbol: "menubar.rectangle", title: "Ads Recovery stays in your menu bar", detail: "Close this window. Click the circular arrow icon whenever you need settings or a manual reload.")
             HelpRow(symbol: "hand.raised", title: "Start by observing", detail: "Automatic recovery is off. You can enable it separately when you are ready to try the experimental mode.")
-            HelpRow(symbol: "clock", title: "Time between attempts", detail: "Automatic mode waits 60 seconds on the known loading screen and attempts recovery at most once every 30 minutes.")
+            HelpRow(symbol: "safari", title: "Keep Safari in front", detail: "Open Ads Manager below and leave its tab selected. If it loads normally, there is nothing to recover. Save your edits before using Recover Ads Manager… from the app window.")
             PrivacyView(diagnostics: model.diagnostics)
             Text("Only the English “Loading your ad account” screen is recognized. This cannot fix every Meta issue.")
                 .font(Brand.text(12)).foregroundStyle(Brand.muted).lineSpacing(3)
@@ -320,6 +354,7 @@ struct DashboardView: View {
 struct RootView: View {
     @ObservedObject var model: RecoveryModel
     @AppStorage("publicOnboardingV1Finished") private var finished = false
+    @ViewState private var reviewedAccess = false
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 10) {
@@ -334,8 +369,8 @@ struct RootView: View {
                 Text("by PAD team").font(Brand.text(12)).foregroundStyle(Brand.muted)
             }.padding(.horizontal, 18).padding(.vertical, 13)
                 .modifier(GlassSurface(radius: 20)).padding(.horizontal, 16).padding(.top, 12)
-            if finished { DashboardView(model: model, showSetup: { finished = false }) }
-            else { OnboardingView(model: model, finish: { finished = true; model.activate() }) }
+            if finished && Installation.currentIsInstalled && (model.permitted || reviewedAccess) { DashboardView(model: model, showSetup: { finished = false }) }
+            else { OnboardingView(model: model, finish: { finished = true; reviewedAccess = true; model.activate() }) }
             AgencyFooter()
         }.frame(width: 720, height: 680).background {
             ZStack {

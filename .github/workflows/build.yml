@@ -22,6 +22,11 @@ jobs:
         run: python3 -m unittest discover -s Server -p "test_*.py"
       - name: Test and build Apple Silicon + Intel
         run: bash Scripts/build.sh
+      - name: Build drag-and-drop installer
+        run: |
+          python3 -m venv build/dmg-tools
+          build/dmg-tools/bin/pip install dmgbuild==1.6.5
+          DMGBUILD="$PWD/build/dmg-tools/bin/dmgbuild" bash Scripts/package-dmg.sh
       - name: Verify bundle and both architectures
         run: |
           codesign --verify --strict 'build/Ads Recovery.app'
@@ -33,6 +38,7 @@ jobs:
         with:
           name: Ads-Recovery-macOS
           path: |
+            build/Ads-Recovery-macOS.dmg
             build/Ads-Recovery-macOS.zip
             build/SHA256SUMS.txt
           if-no-files-found: error

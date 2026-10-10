@@ -20,6 +20,8 @@ iconutil -c icns "$OUT/AppIcon.iconset" -o "$OUT/Ads Recovery.app/Contents/Resou
 cp "$ROOT/Resources/PAD-mascot.png" "$OUT/icons/AppIcon-128.png" "$OUT/icons/StatusIcon.png" "$OUT/Ads Recovery.app/Contents/Resources/"
 xcrun swiftc "$ROOT/Sources/Detector.swift" "$ROOT/Sources/Diagnostics.swift" "$ROOT/Tests/DetectorTests.swift" -o "$OUT/bin/tests"
 "$OUT/bin/tests"
+xcrun swiftc "$ROOT/Sources/Installation.swift" "$ROOT/Tests/InstallationTests.swift" -o "$OUT/bin/installation-tests"
+"$OUT/bin/installation-tests"
 ARCHS="${ARCHS:-arm64 x86_64}"
 for arch in $ARCHS; do
   xcrun swiftc -swift-version 5 -O -target "$arch-apple-macosx14.0" "$ROOT"/Sources/*.swift -o "$OUT/bin/AdsRecovery-$arch"

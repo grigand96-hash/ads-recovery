@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.1 · 2026-10-10
+
+- A drag-and-drop DMG installer with an Applications shortcut and a visual installation guide.
+- A location check explains how to move the app before requesting macOS access.
+- Four setup steps: Install, Safari, Access, and Ready. Installed copies skip the move step.
+- An illustrated permission screen with direct access to System Settings and live permission status.
+- First-run help for missing entries and permissions left over from an older build.
+- Setup opens again when the current copy needs access. The final step can open Ads Manager in Safari.
+
+Recovery behavior and diagnostic consent are unchanged. Automatic recovery remains experimental. This beta is not notarized; macOS may require first-launch approval and renewed permission after updating.
+
 ## 0.1.0 · 2026-10-10
 
 First public beta. Earlier local prototype numbers were not public releases.
