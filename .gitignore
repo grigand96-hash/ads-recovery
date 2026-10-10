@@ -1,0 +1,7 @@
+build/
+work/
+outputs/
+.DS_Store
+*.har
+*.sample.txt
+*.dSYM/
