@@ -1,0 +1,32 @@
+name: Report a problem
+description: Report a loading, permission, or installation issue without sharing account data
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: "Please do not include account IDs, URLs with account parameters, ad data, HAR files, cookies, or credentials."
+  - type: input
+    id: versions
+    attributes:
+      label: App, macOS, and Safari versions
+      placeholder: "Ads Recovery 0.1.0, macOS 27.0, Safari 27.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where did the issue occur?
+      options:
+        - Installation
+        - macOS permission
+        - Page detection
+        - Manual recovery
+        - Automatic recovery
+        - Diagnostics
+  - type: textarea
+    id: behavior
+    attributes:
+      label: What happened?
+      description: Describe the expected result and the generic status shown in the app.
+    validations:
+      required: true

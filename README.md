@@ -1,6 +1,20 @@
-# Ads Recovery
+<img src="docs/assets/app-icon.png" alt="Ads Recovery app icon" width="88" height="88">
 
-A small macOS menu bar app by [PAD team](https://pad.team/) for Meta Ads Manager in Safari. It recognizes the initial loading screen and can reload the page from origin.
+# Ads Recovery for Meta Ads Manager in Safari
+
+A free macOS menu bar app by [PAD team](https://pad.team/) for the times Meta Ads Manager gets stuck on **Loading your ad account**. It recognizes that initial loading screen and can reload the page from origin.
+
+[Download 0.1.0 beta](https://github.com/grigand96-hash/ads-recovery/releases/tag/v0.1.0) · [Product page](https://pad.team/en/tools/ads-recovery/) · [Changelog](CHANGELOG.md) · [Report a bug](https://github.com/grigand96-hash/ads-recovery/issues/new?template=bug_report.yml)
+
+macOS 14+ · Apple Silicon and Intel · English interface · Free · Open-source code
+
+![Ads Recovery 0.1.0 welcome screen with the PAD team design and native Liquid Glass controls](docs/assets/onboarding.png)
+
+## Who it is for
+
+Media buyers, performance marketers, app founders, and agency teams who manage Meta campaigns in Safari on a Mac. If the account stays on its initial loading screen, Ads Recovery provides a visible status and a controlled way to request a reload. There is no account to create and no Meta login to share with the app.
+
+This is a standalone Mac app, not a Safari extension. It stays in the menu bar and uses macOS interface access to inspect the active Safari window. It does not change campaign budgets, publish ads, or bypass account restrictions.
 
 **Experimental beta.** Manual reload and detection of the loaded interface were verified on a local Mac. Automatic recovery from a second real-world hang has not yet been verified. This is not a fix for every Meta or Safari issue, and it is not affiliated with Meta or Apple.
 
@@ -10,6 +24,21 @@ A small macOS menu bar app by [PAD team](https://pad.team/) for Meta Ads Manager
 - A menu bar icon, current status, manual recovery, pause, and a short local activity history.
 - Automatic recovery as an optional experimental mode, off at every launch.
 - A native AppKit / SwiftUI interface using system fonts. No embedded browser or third-party runtime.
+
+## Download and install
+
+1. Download **Ads-Recovery-macOS.zip** from the [0.1.0 release](https://github.com/grigand96-hash/ads-recovery/releases/tag/v0.1.0).
+2. Unzip it and move **Ads Recovery.app** to **Applications**. Keep one installed copy.
+3. Open the app. Because this beta is not notarized, macOS may block the first launch. If you choose to trust this download, follow [Apple's Open Anyway instructions](https://support.apple.com/en-gb/102445) in Privacy & Security. Do not disable Gatekeeper globally.
+4. Follow **Welcome → Access → Ready**. Allow the requested macOS permission, then open Ads Manager in Safari. You can reopen these instructions with **Setup guide** in the header.
+
+The release includes `SHA256SUMS.txt` to check download integrity. A matching checksum does not replace Apple notarization. Installation through the normal downloaded-file security flow on a clean Mac remains unverified.
+
+## What it can and cannot recover
+
+The current detector looks for the English initial loading message, rather than treating every slow page as broken. Manual recovery asks you to save edits first. Automatic recovery is optional and starts off: it waits 60 seconds and allows at most one attempt per 30 minutes.
+
+It will not fix Meta outages, disabled accounts, missing permissions, login challenges, network failures, or every blank-page issue. Unknown page states are left alone. The underlying cause of the original Safari loading failure has not been conclusively established.
 
 ## Build
 
@@ -31,7 +60,7 @@ No paid Apple Developer account is required for these builds. The app uses an **
 
 ## GitHub builds
 
-The workflow runs on pushes to `main`, version tags, pull requests, and manual dispatch. It uploads a ZIP and checksum to the Actions run. It does not publish a GitHub Release, modify the repository, or require signing secrets. Downloaded-build installation still needs testing on a clean Mac.
+The workflow runs on pushes to `main`, version tags, pull requests, and manual dispatch. It uploads a ZIP and checksum to the Actions run. It does not automatically publish a GitHub Release, modify the repository, or require signing secrets. Reviewed releases are published separately with the verified ZIP and checksum. Downloaded-build installation still needs testing on a clean Mac.
 
 ## First run
 
@@ -73,3 +102,19 @@ Source code: MIT. PAD team branding and mascot are excluded from that license. T
 The first public beta is **0.1.0**. `VERSION` is the source of truth for the app and build number. Update it with `CHANGELOG.md` for each release, then tag the same commit as `v0.1.0` (or the next version). Tag builds fail if the tag does not match `VERSION`. Patch versions cover fixes, minor versions add features, and 1.0 is reserved for a tested stable release.
 
 See `Server/README.md` for operating the separate diagnostic receiver.
+
+## Troubleshooting and feedback
+
+**Access is enabled, but the app still asks for it:** macOS can retain a permission entry for an older ad-hoc-signed build. Remove only the old Ads Recovery entry and add the installed copy again. The setup guide can reveal the correct copy in Finder. The app checks for permission changes automatically.
+
+**The status says Waiting for Safari:** checks run only while Safari is the active app. Switching to another app pauses page inspection. The recent activity list keeps the last result.
+
+**The status says Waiting for Ads Manager:** select the Ads Manager tab. Other sites are outside the detector's scope.
+
+**A reload has no confirmed result:** switching tabs, leaving Safari, or quitting can interrupt observation. A reported interface only means a table appeared; it does not establish that all campaign data loaded.
+
+[Open an issue](https://github.com/grigand96-hash/ads-recovery/issues) with your app, macOS, and Safari versions and the generic status you saw. Do not post account IDs, business IDs, campaign data, browser profiles, HAR files, cookies, or credentials. Optional in-app diagnostics are off by default; see Privacy above for the exact fields and retention.
+
+## About PAD team
+
+We build tools alongside our work in mobile app marketing. [PAD team](https://pad.team/en/) helps app teams with paid acquisition, creative, and growth. Explore our [marketing tools](https://pad.team/en/tools/).
