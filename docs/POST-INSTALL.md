@@ -1,6 +1,6 @@
 # Install and set up Ads Recovery on your Mac
 
-[Download Ads Recovery 0.1.0](https://github.com/grigand96-hash/ads-recovery/releases/download/v0.1.0/Ads-Recovery-macOS.zip) · [About the app](../README.md) · [Website guide](https://pad.team/en/tools/ads-recovery/#setup)
+[Download Ads Recovery 0.1.1](https://github.com/grigand96-hash/ads-recovery/releases/download/v0.1.1/Ads-Recovery-macOS.dmg) · [About the app](../README.md) · [Website guide](https://pad.team/en/tools/ads-recovery/#setup)
 
 You need a Mac running macOS 14 or later and Safari. The download includes both Apple Silicon and Intel versions. No Terminal commands, developer tools, or GitHub account are needed.
 
@@ -8,10 +8,14 @@ Already moved the app to Applications? Start with [Open the app](#open-the-app).
 
 ## Download and move to Applications
 
-1. Click **Download Ads Recovery 0.1.0** above. The file is named **Ads-Recovery-macOS.zip**. On the release page, choose this file under **Assets**, not either “Source code” download.
-2. Open **Finder → Downloads**. Double-click the ZIP if Safari has not already unpacked it.
-3. Drag **Ads Recovery.app** into **Applications** in Finder's sidebar. If Finder hides file extensions, it may appear as **Ads Recovery**.
-4. Open the copy in Applications. Keep just one installed copy so macOS can assign permission to the right app.
+1. Click **Download Ads Recovery 0.1.1** above. Open **Ads-Recovery-macOS.dmg** from Downloads.
+2. In the installer window, drag the **Ads Recovery** icon onto the **Applications** folder beside it.
+3. Wait for the copy to finish. Open **Applications** in Finder, then open **Ads Recovery** there.
+4. Eject the Ads Recovery disk image from Finder when you are done. Keep one installed copy.
+
+The ZIP download is also available on the release page. If you use it, unpack the ZIP and drag the app into Applications yourself. You do not need either “Source code” file.
+
+If you open the app from the disk image or Downloads, it shows a visual move guide before requesting permission. Quit that copy, move the app, and reopen it from Applications.
 
 ## Open the app
 
@@ -23,10 +27,10 @@ Do not turn off Gatekeeper for the whole Mac. If macOS reports malware or a dama
 
 ## Allow access to Safari
 
-1. In Ads Recovery, follow **Welcome → Access → Ready**. If you see the main window instead, click **Setup guide** at the top.
+1. In Ads Recovery, follow **Install → Safari → Access → Ready**. If you see the main window instead, click **Setup guide** at the top.
 2. On the Access screen, use the button that opens system settings.
 3. Turn on **Ads Recovery** under **Privacy & Security → Device Control and Data Access**. Older macOS versions call this **Accessibility**. Approve the system prompt if asked.
-4. Return to Ads Recovery. It should show **Access granted**. Click **Check access** if needed, then continue to **Ready** and click **Get started**.
+4. Return to Ads Recovery. It should show **Access granted**. Click **Check access** if needed, then continue to **Ready** and click **Open Ads Manager**.
 
 This is a broad macOS permission to read and control interfaces. Ads Recovery's code limits its checks to the active Safari window and supported Ads Manager pages. It needs this permission to recognize the loading screen and request a reload.
 
@@ -66,7 +70,7 @@ Select the actual Ads Manager tab in Safari. Other websites and unrelated Meta p
 
 ### The introduction did not appear
 
-Click **Setup guide** at the top of the Ads Recovery window. You can revisit it at any time.
+Click **Setup guide** at the top of the Ads Recovery window. You can revisit it at any time. Installed copies skip the Install step. If an update needs access again, setup opens automatically.
 
 ### Ads Manager is blank or uses another language
 
@@ -76,4 +80,4 @@ The current detector recognizes the English **Loading your ad account** message.
 
 [Report a problem on GitHub](https://github.com/grigand96-hash/ads-recovery/issues/new?template=bug_report.yml). Include your app, macOS, and Safari versions and the status you saw. Leave out account IDs, campaign data, cookies, credentials, browser profiles, and HAR files.
 
-Version 0.1.0 is an experimental beta. Intel, older macOS versions, and the downloaded-file security flow on a clean Mac still need testing. Ads Recovery is an independent PAD team app, with no affiliation to Meta or Apple.
+Version 0.1.1 is an experimental beta. Intel, older macOS versions, and the downloaded-file security flow on a clean Mac still need testing. Ads Recovery is an independent PAD team app, with no affiliation to Meta or Apple.

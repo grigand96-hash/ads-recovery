@@ -4,17 +4,17 @@
 
 A free macOS menu bar app by [PAD team](https://pad.team/) for the times Meta Ads Manager gets stuck on **Loading your ad account**. It recognizes that initial loading screen and can reload the page from origin.
 
-[Download for Mac](https://github.com/grigand96-hash/ads-recovery/releases/download/v0.1.0/Ads-Recovery-macOS.zip) · **[After installation: setup guide](docs/POST-INSTALL.md)** · [Product page](https://pad.team/en/tools/ads-recovery/) · [Changelog](CHANGELOG.md) · [Report a bug](https://github.com/grigand96-hash/ads-recovery/issues/new?template=bug_report.yml)
+[Download for Mac](https://github.com/grigand96-hash/ads-recovery/releases/download/v0.1.1/Ads-Recovery-macOS.dmg) · **[After installation: setup guide](docs/POST-INSTALL.md)** · [Product page](https://pad.team/en/tools/ads-recovery/) · [Changelog](CHANGELOG.md) · [Report a bug](https://github.com/grigand96-hash/ads-recovery/issues/new?template=bug_report.yml)
 
 macOS 14+ · Apple Silicon and Intel · English interface · Free · Open-source code
 
 ## Start here
 
-1. **[Download the app](https://github.com/grigand96-hash/ads-recovery/releases/download/v0.1.0/Ads-Recovery-macOS.zip)**, double-click the ZIP, and drag **Ads Recovery.app** into **Applications**.
+1. **[Download the app](https://github.com/grigand96-hash/ads-recovery/releases/download/v0.1.1/Ads-Recovery-macOS.dmg)**, open the DMG, and drag **Ads Recovery.app** into **Applications**.
 2. Open it from Applications. If macOS blocks it, follow the [first-launch instructions](docs/POST-INSTALL.md#open-the-app).
 3. Follow the [setup guide](docs/POST-INSTALL.md#allow-access-to-safari), then open your Ads Manager tab in Safari.
 
-You do not need Terminal, Xcode, or a GitHub account. Download the app ZIP, not the “Source code” files on the release page.
+You do not need Terminal, Xcode, or a GitHub account. Download the app DMG, not the “Source code” files on the release page.
 
 ## Meta Ads Manager not loading in Safari
 
@@ -22,13 +22,13 @@ You open Facebook Ads Manager, sign in, and wait. The page stays on **Loading yo
 
 Advertisers have reported this Safari loading problem in [this community discussion](https://www.reddit.com/r/FacebookAds/comments/1d5uvj3/ad_manager_wont_load/). The reports show a recurring symptom, but do not establish one cause or tell us how many people it affects.
 
-A blank page, a partly loaded dashboard, and an account restriction can look similar at first. Ads Recovery 0.1.0 detects the specific English loading screen. It does not automatically treat every blank or slow page as a hang.
+A blank page, a partly loaded dashboard, and an account restriction can look similar at first. Ads Recovery 0.1.1 detects the specific English loading screen. It does not automatically treat every blank or slow page as a hang.
 
 ### Why does Ads Manager get stuck?
 
 The loading screen alone cannot tell you. A browser session, a failed page request, a connection problem, or a problem on Meta's side needs a different diagnosis. We have not established the underlying cause of the original Safari failure. The app gives you a way to try reloading the page and see what happens; it does not repair Meta's service or your account.
 
-![Ads Recovery 0.1.0 welcome screen with the PAD team design and native Liquid Glass controls](docs/assets/onboarding.png)
+![Ads Recovery 0.1.1 welcome screen with the PAD team design and native Liquid Glass controls](docs/assets/onboarding.png)
 
 ## Who it is for
 
@@ -40,7 +40,7 @@ This is a standalone Mac app, not a Safari extension. It stays in the menu bar a
 
 ## What you get
 
-- A three-step introduction in English, with an explanation of the macOS permission.
+- A visual DMG installer and four-step setup guide with illustrated macOS permission instructions.
 - A menu bar icon, current status, manual recovery, pause, and a short local activity history.
 - Automatic recovery as an optional experimental mode, off at every launch.
 - A native AppKit / SwiftUI interface using system fonts. No embedded browser or third-party runtime.
@@ -102,7 +102,7 @@ Requires macOS and Apple Command Line Tools or Xcode. Use Xcode 26 or newer to i
 bash Scripts/build.sh
 ```
 
-The script runs the detector tests, generates the icons, compiles Apple Silicon and Intel slices, packages `build/Ads Recovery.app`, and produces `build/Ads-Recovery-macOS.zip` with `build/SHA256SUMS.txt`.
+The script runs the detector tests, generates the icons, compiles Apple Silicon and Intel slices, packages `build/Ads Recovery.app`, and produces `build/Ads-Recovery-macOS.dmg` with `build/SHA256SUMS.txt`.
 
 For an Apple Silicon-only development build:
 
@@ -114,11 +114,13 @@ No paid Apple Developer account is required for these builds. The app uses an **
 
 ## GitHub builds
 
-The workflow runs on pushes to `main`, version tags, pull requests, and manual dispatch. It uploads a ZIP and checksum to the Actions run. It does not automatically publish a GitHub Release, modify the repository, or require signing secrets. Reviewed releases are published separately with the verified ZIP and checksum. Downloaded-build installation still needs testing on a clean Mac.
+The installer is built with `dmgbuild==1.6.5` and `Scripts/package-dmg.sh`. It includes an Applications shortcut and a visual drag-and-drop guide.
+
+The workflow runs on pushes to `main`, version tags, pull requests, and manual dispatch. It uploads a DMG, ZIP, and checksum to the Actions run. It does not automatically publish a GitHub Release, modify the repository, or require signing secrets. Reviewed releases are published separately with the verified ZIP and checksum. Downloaded-build installation still needs testing on a clean Mac.
 
 ## Versions
 
-The first public beta is **0.1.0**. `VERSION` is the source of truth for the app and build number. Update it with `CHANGELOG.md` for each release, then tag the same commit as `v0.1.0` (or the next version). Tag builds fail if the tag does not match `VERSION`. Patch versions cover fixes, minor versions add features, and 1.0 is reserved for a tested stable release.
+The current public beta is **0.1.1**. The first public release was 0.1.0. `VERSION` is the source of truth for the app and build number. Update it with `CHANGELOG.md` for each release, then tag the same commit as `v0.1.1` (or the next version). Tag builds fail if the tag does not match `VERSION`. Patch versions cover fixes, minor versions add features, and 1.0 is reserved for a tested stable release.
 
 See `Server/README.md` for operating the separate diagnostic receiver.
 
