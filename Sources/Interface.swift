@@ -141,7 +141,7 @@ struct OnboardingView: View {
                         Text(name).font(Brand.text(12, index == step ? .medium : .regular)).foregroundStyle(index == step ? Brand.ink : Brand.muted)
                     }.accessibilityElement(children: .ignore).accessibilityLabel("Step \(index + 1): \(name)\(index == step ? ", current" : "")")
                 }
-            }.padding(.bottom, 30)
+            }.padding(.bottom, 24)
             ScrollView {
                 Group {
                     if step == 0 { installation }
@@ -150,7 +150,7 @@ struct OnboardingView: View {
                     else { ready }
                 }.frame(maxWidth: .infinity, alignment: .leading).padding(.top, 8)
             }
-            Spacer(minLength: 18)
+            Spacer(minLength: 12)
             HStack {
                 if step > 0 {
                     Button("Back") { step -= 1 }.buttonStyle(.plain).font(Brand.text(13)).foregroundStyle(Brand.muted)
@@ -170,7 +170,7 @@ struct OnboardingView: View {
                     }.buttonStyle(ActionStyle())
                 }
             }
-        }.padding(30)
+        }.padding(.horizontal, 30).padding(.vertical, 24)
     }
     private var installation: some View {
         VStack(alignment: .leading, spacing: 22) {
