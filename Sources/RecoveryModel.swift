@@ -22,15 +22,17 @@ final class RecoveryModel: ObservableObject {
     @Published var working = false
     @Published var events: [ActivityEntry] = []
     @Published var notice: String?
+    let diagnostics = Diagnostics()
     var onUpdate: (() -> Void)?
     private var timer: Timer?
+    private var permissionTimer: Timer?
     private var observers: [NSObjectProtocol] = []
     private let worker = DispatchQueue(label: "team.pad.adsrecovery.inspect", qos: .utility)
     private var gate = LoadingGate()
     private var lastSnapshot: Snapshot?
     private var inFlight = false
     private var generation = 0
-    private var pendingRecovery: (url: String, pid: pid_t, date: Date)?
+    private var pendingRecovery: (url: String, pid: pid_t, date: Date, method: RecoveryMethod)?
 
     init() {
         gate.lastAttempt = UserDefaults.standard.double(forKey: "lastRecovery")
@@ -38,6 +40,11 @@ final class RecoveryModel: ObservableObject {
             observers.append(NSWorkspace.shared.notificationCenter.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in self?.activate() })
         }
         observers.append(NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.willSleepNotification, object: nil, queue: .main) { [weak self] _ in self?.suspend() })
+        permissionTimer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
+            guard let self else { return }
+            if self.permitted != AXIsProcessTrusted() { self.activate() }
+        }
+        permissionTimer?.tolerance = 1
         activate()
     }
     func log(_ text: String) {
@@ -57,7 +64,7 @@ final class RecoveryModel: ObservableObject {
         suspend(); refreshPermission()
         guard permitted else {
             title = "Safari access needed"
-            detail = "Allow interface access in macOS settings."
+            detail = "macOS has not granted access to this build. If Ads Recovery is already enabled in Settings, open the setup guide to repair its permission."
             onUpdate?(); return
         }
         guard monitoring else {
@@ -127,6 +134,7 @@ final class RecoveryModel: ObservableObject {
         }
     }
     private func process(_ s: Snapshot, manual: Bool) {
+        diagnostics.record(.scan, state: s.state, milliseconds: s.milliseconds)
         checks += 1; lastCheck = Date(); milliseconds = s.milliseconds
         if let previous = lastSnapshot {
             if let a = previous.web, let b = s.web, !CFEqual(a, b) { gate.reset() }
@@ -149,9 +157,11 @@ final class RecoveryModel: ObservableObject {
         if changed && s.state != .outside { log(title) }
         if let pending = pendingRecovery {
             if pending.url == s.url && pending.pid == s.pid && s.state == .interfaceReady {
+                diagnostics.record(.interfaceAppeared, state: s.state, method: pending.method, milliseconds: Int(Date().timeIntervalSince(pending.date) * 1000))
                 log("Ads Manager interface appeared after reload")
                 pendingRecovery = nil
             } else if Date().timeIntervalSince(pending.date) > 90 {
+                diagnostics.record(.outcomeUnknown, state: s.state, method: pending.method)
                 log("Reload result could not be confirmed")
                 pendingRecovery = nil
             }
@@ -159,7 +169,7 @@ final class RecoveryModel: ObservableObject {
         onUpdate?()
         let due = gate.observe(s.state, key: "\(s.pid):\(s.url)", now: Date.timeIntervalSinceReferenceDate)
         guard (automatic && monitoring && due) || (manual && [.interfaceReady, .loading].contains(s.state)) else {
-            if manual { notice = "Reload cancelled: open Ads Manager, finish editing, and close any dialogs." }
+            if manual { diagnostics.record(.reloadCancelled, state: s.state, method: .manual); notice = "Reload cancelled: open Ads Manager, finish editing, and close any dialogs." }
             return
         }
         if !manual {
@@ -181,6 +191,7 @@ final class RecoveryModel: ObservableObject {
                       let web = s.web, let web2 = fresh.web, CFEqual(web, web2),
                       fresh.state == s.state,
                       NSWorkspace.shared.frontmostApplication?.processIdentifier == s.pid else {
+                    self.diagnostics.record(.reloadCancelled, state: fresh.state, method: manual ? .manual : .automatic)
                     self.log("Reload cancelled: the tab state changed")
                     return
                 }
@@ -189,7 +200,8 @@ final class RecoveryModel: ObservableObject {
                 down.flags = [.maskCommand, .maskAlternate]; up.flags = [.maskCommand, .maskAlternate]
                 down.postToPid(s.pid); up.postToPid(s.pid)
                 self.attempts += 1
-                self.pendingRecovery = (s.url, s.pid, Date())
+                self.pendingRecovery = (s.url, s.pid, Date(), manual ? .manual : .automatic)
+                self.diagnostics.record(.reloadSent, state: s.state, method: manual ? .manual : .automatic)
                 self.gate.attempted(now: Date.timeIntervalSinceReferenceDate)
                 UserDefaults.standard.set(self.gate.lastAttempt, forKey: "lastRecovery")
                 self.title = "Reloading Ads Manager"

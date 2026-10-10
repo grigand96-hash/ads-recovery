@@ -2,7 +2,13 @@
 set -euo pipefail
 ROOT=$(cd -- "$(dirname -- "$0")/.." && pwd)
 OUT="${BUILD_DIR:-$ROOT/build}"
-VERSION="${APP_VERSION:-0.3.0}"
+VERSION=$(tr -d '\n' < "$ROOT/VERSION")
+if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  echo 'VERSION must use major.minor.patch' >&2; exit 1
+fi
+if [[ "${GITHUB_REF_TYPE:-}" == tag && "${GITHUB_REF_NAME:-}" != "v$VERSION" ]]; then
+  echo 'Git tag must match VERSION' >&2; exit 1
+fi
 mkdir -p "$OUT/icons" "$OUT/AppIcon.iconset" "$OUT/bin" "$OUT/Ads Recovery.app/Contents/MacOS" "$OUT/Ads Recovery.app/Contents/Resources"
 xcrun swift "$ROOT/Scripts/GenerateIcons.swift" "$OUT/icons"
 for size in 16 32 128 256 512; do
@@ -12,7 +18,7 @@ for size in 16 32 128 256 512; do
 done
 iconutil -c icns "$OUT/AppIcon.iconset" -o "$OUT/Ads Recovery.app/Contents/Resources/AppIcon.icns"
 cp "$ROOT/Resources/PAD-mascot.png" "$OUT/icons/AppIcon-128.png" "$OUT/icons/StatusIcon.png" "$OUT/Ads Recovery.app/Contents/Resources/"
-xcrun swiftc "$ROOT/Sources/Detector.swift" "$ROOT/Tests/DetectorTests.swift" -o "$OUT/bin/tests"
+xcrun swiftc "$ROOT/Sources/Detector.swift" "$ROOT/Sources/Diagnostics.swift" "$ROOT/Tests/DetectorTests.swift" -o "$OUT/bin/tests"
 "$OUT/bin/tests"
 ARCHS="${ARCHS:-arm64 x86_64}"
 for arch in $ARCHS; do
@@ -32,7 +38,7 @@ cat > "$OUT/Ads Recovery.app/Contents/Info.plist" <<PLIST
 <key>CFBundleDisplayName</key><string>Ads Recovery</string>
 <key>CFBundlePackageType</key><string>APPL</string>
 <key>CFBundleShortVersionString</key><string>$VERSION</string>
-<key>CFBundleVersion</key><string>3</string>
+<key>CFBundleVersion</key><string>$VERSION</string>
 <key>CFBundleIconFile</key><string>AppIcon</string>
 <key>LSUIElement</key><true/>
 <key>LSMinimumSystemVersion</key><string>14.0</string>

@@ -13,16 +13,41 @@ enum Brand {
     static func text(_ size: CGFloat, _ weight: Font.Weight = .regular) -> Font { .system(size: size, weight: weight) }
 }
 
+struct GlassSurface: ViewModifier {
+    var radius: CGFloat = 16
+    var interactive = false
+    var tint: Color? = nil
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @ViewBuilder func body(content: Content) -> some View {
+        if reduceTransparency {
+            content.background(tint ?? Color.white, in: RoundedRectangle(cornerRadius: radius))
+        } else {
+            #if compiler(>=6.2)
+            if #available(macOS 26.0, *) {
+                content.glassEffect(.regular.tint(tint).interactive(interactive), in: RoundedRectangle(cornerRadius: radius))
+            } else {
+                fallback(content)
+            }
+            #else
+            fallback(content)
+            #endif
+        }
+    }
+    private func fallback(_ content: Content) -> some View {
+        content.background { RoundedRectangle(cornerRadius: radius).fill(tint ?? Color.clear).opacity(0.9) }
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: radius))
+            .overlay(RoundedRectangle(cornerRadius: radius).stroke(Color.white.opacity(0.7), lineWidth: 1).allowsHitTesting(false))
+    }
+}
+
 struct ActionStyle: ButtonStyle {
     var primary = true
     @Environment(\.isEnabled) private var enabled
     func makeBody(configuration: Configuration) -> some View {
         configuration.label.font(Brand.text(13, .medium))
             .padding(.horizontal, 18).frame(height: 40)
-            .foregroundStyle(primary ? Color.white : Brand.ink)
-            .background(primary ? Brand.ink : Color.white)
-            .clipShape(RoundedRectangle(cornerRadius: 9))
-            .overlay(RoundedRectangle(cornerRadius: 9).stroke(primary ? Color.clear : Brand.line, lineWidth: 1))
+            .foregroundStyle(Brand.ink)
+            .modifier(GlassSurface(radius: 20, interactive: true, tint: primary ? Brand.blue.opacity(0.18) : nil))
             .opacity(enabled ? (configuration.isPressed ? 0.72 : 1) : 0.4)
     }
 }
@@ -49,8 +74,8 @@ struct AgencyFooter: View {
                 HStack(spacing: 7) { Text("About the agency"); Image(systemName: "arrow.up.right") }
                     .font(Brand.text(12, .medium)).foregroundStyle(Brand.ink)
             }.help("Open pad.team in your browser")
-        }.padding(.horizontal, 30).padding(.vertical, 13)
-            .background(Color.white)
+        }.padding(.horizontal, 18).padding(.vertical, 13)
+            .modifier(GlassSurface(radius: 20)).padding(.horizontal, 16).padding(.bottom, 14)
     }
 }
 
@@ -175,7 +200,14 @@ struct OnboardingView: View {
                 Text("Enable Ads Recovery in the app list, then return here.")
                     .font(Brand.text(12)).foregroundStyle(Brand.muted)
             }
-            Text("The app only works with Safari. Page content is never saved or sent to a server.")
+            DisclosureGroup("Already enabled, but access is still missing?") {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("This beta uses an ad-hoc signature. macOS may keep permission for an older build, even when its switch is on. Remove only the old Ads Recovery entry with the minus button, then add this copy again using the plus button. Approve the macOS prompt and return here. Access is checked automatically.")
+                    Button("Show this copy in Finder") { NSWorkspace.shared.activateFileViewerSelecting([Bundle.main.bundleURL]) }.buttonStyle(.link)
+                    Text("Keep one installed copy in Applications. A later update may need permission again.")
+                }.font(Brand.text(12)).foregroundStyle(Brand.muted).lineSpacing(3).padding(.top, 8)
+            }.font(Brand.text(12))
+            Text("The app only works with Safari. Page content is never saved or sent. Optional diagnostics use only technical events, with your permission.")
                 .font(Brand.text(12)).foregroundStyle(Brand.muted).lineSpacing(3)
         }
     }
@@ -185,6 +217,7 @@ struct OnboardingView: View {
             HelpRow(symbol: "menubar.rectangle", title: "Ads Recovery stays in your menu bar", detail: "Close this window. Click the circular arrow icon whenever you need settings or a manual reload.")
             HelpRow(symbol: "hand.raised", title: "Start by observing", detail: "Automatic recovery is off. You can enable it separately when you are ready to try the experimental mode.")
             HelpRow(symbol: "clock", title: "Time between attempts", detail: "Automatic mode waits 60 seconds on the known loading screen and attempts recovery at most once every 30 minutes.")
+            PrivacyView(diagnostics: model.diagnostics)
             Text("Only the English “Loading your ad account” screen is recognized. This cannot fix every Meta issue.")
                 .font(Brand.text(12)).foregroundStyle(Brand.muted).lineSpacing(3)
         }
@@ -244,11 +277,12 @@ struct DashboardView: View {
                         }
                     }
                 }
+                PrivacyView(diagnostics: model.diagnostics)
                 DisclosureGroup("How it works and check details", isExpanded: $showDetails) {
                     VStack(alignment: .leading, spacing: 10) {
                         Text("The known loading screen is observed for 60 seconds. Input fields, dialogs, or an unknown state prevent a reload. A visible interface does not confirm that all campaign data has loaded.")
                         Text("This session: \(model.checks) checks, \(model.attempts) reload commands. Last check: \(model.milliseconds) ms.")
-                        Text("Activity stays in memory until you quit. Only setup completion and the last recovery time are saved. Automatic recovery is off at every launch.")
+                        Text("Activity stays in memory until you quit. Only setup completion, diagnostic consent, and the last recovery time are saved. Automatic recovery is off at every launch.")
                         HStack(spacing: 18) {
                             Button("Check now") { model.inspectNow() }
                             Button("Show introduction again", action: showSetup)
@@ -285,26 +319,69 @@ struct DashboardView: View {
 
 struct RootView: View {
     @ObservedObject var model: RecoveryModel
-    @AppStorage("onboardingFinished") private var finished = false
+    @AppStorage("publicOnboardingV1Finished") private var finished = false
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 10) {
                 AssetImage(name: "AppIcon-128").frame(width: 31, height: 31).accessibilityHidden(true)
                 Text("Ads Recovery").font(Brand.text(14, .medium))
-                Text("BETA").font(Brand.text(9, .medium)).tracking(1).foregroundStyle(Brand.muted)
+                Text("v\(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.1.0") BETA").font(Brand.text(9, .medium)).tracking(1).foregroundStyle(Brand.muted)
                     .padding(.horizontal, 7).padding(.vertical, 4).overlay(Capsule().stroke(Brand.line, lineWidth: 1))
                 Spacer()
+                if finished {
+                    Button("Setup guide") { finished = false }.buttonStyle(.link).font(Brand.text(12))
+                }
                 Text("by PAD team").font(Brand.text(12)).foregroundStyle(Brand.muted)
-            }.padding(.horizontal, 30).padding(.vertical, 16)
-            Rectangle().fill(Brand.line).frame(height: 1)
+            }.padding(.horizontal, 18).padding(.vertical, 13)
+                .modifier(GlassSurface(radius: 20)).padding(.horizontal, 16).padding(.top, 12)
             if finished { DashboardView(model: model, showSetup: { finished = false }) }
             else { OnboardingView(model: model, finish: { finished = true; model.activate() }) }
-            Rectangle().fill(Brand.line).frame(height: 1)
             AgencyFooter()
-        }.frame(width: 720, height: 680).background(Brand.paper).foregroundStyle(Brand.ink)
+        }.frame(width: 720, height: 680).background {
+            ZStack {
+                Brand.paper
+                Circle().fill(Brand.blue.opacity(0.07)).frame(width: 260, height: 260).blur(radius: 70).offset(x: 275, y: -300)
+                Circle().fill(Color.pink.opacity(0.055)).frame(width: 190, height: 190).blur(radius: 60).offset(x: -290, y: 315)
+            }.clipped()
+        }.foregroundStyle(Brand.ink)
             .preferredColorScheme(.light)
             .alert("Ads Recovery", isPresented: Binding(get: { model.notice != nil }, set: { if !$0 { model.notice = nil } })) {
                 Button("OK") { model.notice = nil }
             } message: { Text(model.notice ?? "") }
+    }
+}
+
+struct PrivacyView: View {
+    @ObservedObject var diagnostics: Diagnostics
+    @ViewState private var expanded = false
+    @ViewState private var consent = false
+    @ViewState private var preview = false
+    var body: some View {
+        DisclosureGroup("Privacy & diagnostics", isExpanded: $expanded) {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Recovery runs locally on your Mac. Optional diagnostics help PAD team understand which recovery attempts work.")
+                Toggle("Share technical diagnostics with PAD team", isOn: Binding(get: { diagnostics.enabled }, set: { if $0 { consent = true } else { diagnostics.setEnabled(false) } }))
+                    .toggleStyle(.switch).tint(Brand.blue)
+                Text(diagnostics.status).foregroundStyle(Brand.muted)
+                Text("Shared: app version, macOS version, processor type, check duration, page-state category, reload method, and outcome. No account IDs, URLs, ad content, page text, cookies, credentials, screenshots, or browsing history. No user or device identifier.")
+                Text("Sent over HTTPS to padteam.pro, operated by PAD team. Daily totals are kept for up to 30 days. The server sees your IP during connection but this endpoint does not log it. Network providers may process connection metadata.")
+                Text("Turning this off cancels pending sends and clears the in-memory queue. A request already received cannot be recalled. Previously received daily totals expire automatically and are not indexed by user or device.")
+                Button("Preview pending data (\(diagnostics.queued) events)") { preview = true }.buttonStyle(.link)
+            }.font(Brand.text(12)).lineSpacing(3).padding(.top, 10)
+        }.font(Brand.text(12)).tint(Brand.muted)
+        .alert("Share technical diagnostics?", isPresented: $consent) {
+            Button("Keep local", role: .cancel) { }
+            Button("Agree and enable") { diagnostics.setEnabled(true) }
+        } message: {
+            Text("New technical events will be sent to PAD team at padteam.pro: app and macOS versions, processor type, check timings, page-state categories, reload methods, and outcomes. No page content, account details, URLs, or persistent identifiers. Daily totals expire after 30 days. You can turn this off at any time. Recovery works without sharing.")
+        }
+        .sheet(isPresented: $preview) {
+            VStack(alignment: .leading, spacing: 16) {
+                Text("Pending diagnostic data").font(Brand.text(22))
+                Text("This is the current queue. With sharing enabled, batches are sent about once a minute. Nothing is written to a local log file.").font(Brand.text(12))
+                ScrollView { Text(diagnostics.preview).font(.system(size: 11, design: .monospaced)).textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading) }
+                Button("Done") { preview = false }.buttonStyle(ActionStyle())
+            }.padding(24).frame(width: 570, height: 430)
+        }
     }
 }

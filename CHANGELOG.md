@@ -1,12 +1,16 @@
 # Changelog
 
-## 0.3.0
+## 0.1.0 · 2026-10-10
 
-- Native PAD team interface with three-step onboarding and a status dashboard.
-- Application icon and menu bar template icon.
-- Agency link, pause control, local event list, and explanatory permission states.
-- Manual recovery brings Safari forward and rechecks the active page before acting.
-- Cancel stale scan results after app switches, sleep, or pause. Reject truncated accessibility scans for automatic recovery.
-- Universal macOS build script and GitHub Actions artifact workflow.
+First public beta. Earlier local prototype numbers were not public releases.
 
-Automatic recovery remains experimental and off at startup.
+- English native macOS interface in the PAD team style, with system fonts and three-step onboarding.
+- Liquid Glass header, footer, and buttons on macOS 26+, with fallbacks for older systems and reduced transparency.
+- App icon, menu bar icon, agency link, pause control, and local activity history.
+- Manual recovery and optional experimental automatic recovery for the known English loading screen.
+- Rechecks before reload; stale and truncated scans cannot authorize automatic recovery.
+- Optional diagnostics with separate consent, revocation, and a pending-data preview.
+- PAD team receiver with strict fields, daily aggregates, and 30-day retention.
+- Universal Apple Silicon / Intel builds and GitHub Actions artifacts.
+
+Automatic recovery remains experimental and off at startup. Diagnostics are off until the user agrees. A full automatic recovery on a repeated real hang and installation on a clean Mac still need testing.

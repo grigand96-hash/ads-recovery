@@ -48,7 +48,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.mainMenu = main
     }
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool { showWindow(); return true }
-    @objc func showWindow() { window.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true); model.refreshPermission() }
+    @objc func showWindow() { window.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true); model.activate() }
     @objc func togglePause() { model.setMonitoring(!model.monitoring) }
     @objc func openAds() { model.openAdsManager() }
     @objc func openAgency() { NSWorkspace.shared.open(URL(string: "https://pad.team/")!) }

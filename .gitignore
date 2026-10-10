@@ -5,3 +5,6 @@ outputs/
 *.har
 *.sample.txt
 *.dSYM/
+
+__pycache__/
+*.sqlite3
