@@ -208,11 +208,11 @@ struct OnboardingView: View {
         }
     }
     private var permission: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            Text(model.permitted ? "Safari access is ready" : "Allow access in\nSystem Settings").font(Brand.text(33)).tracking(-0.9)
+        VStack(alignment: .leading, spacing: 12) {
+            Text(model.permitted ? "Safari access is ready" : "Allow Safari access").font(Brand.text(33)).tracking(-0.9)
             Text("macOS asks for permission to read and control interfaces. Ads Recovery uses it to recognize the loading screen in Safari and request a reload.")
-                .font(Brand.text(14)).foregroundStyle(Brand.muted).lineSpacing(4)
-            VStack(alignment: .leading, spacing: 12) {
+                .font(Brand.text(12)).foregroundStyle(Brand.muted).lineSpacing(3)
+            VStack(alignment: .leading, spacing: 8) {
                 Label("Privacy & Security", systemImage: "hand.raised").font(Brand.text(12)).foregroundStyle(Brand.muted)
                 Text("Device Control and Data Access").font(Brand.text(16, .medium))
                 Text("Called Accessibility on older macOS versions").font(Brand.text(11)).foregroundStyle(Brand.muted)
@@ -221,18 +221,19 @@ struct OnboardingView: View {
                     AssetImage(name: "AppIcon-128").frame(width: 34, height: 34)
                     Text("Ads Recovery").font(Brand.text(14, .medium))
                     Spacer()
-                    Image(systemName: "switch.2").font(.system(size: 28)).foregroundStyle(Brand.blue)
+                    Capsule().fill(Brand.blue).frame(width: 34, height: 21)
+                        .overlay(alignment: .trailing) { Circle().fill(Color.white).frame(width: 17, height: 17).padding(2) }.accessibilityHidden(true)
                     Text("Turn on").font(Brand.text(12, .medium))
                 }
                 Text("Illustration of the setting to enable").font(Brand.text(10)).foregroundStyle(Brand.muted)
-            }.padding(18).background(Color.white, in: RoundedRectangle(cornerRadius: 12))
+            }.padding(14).background(Color.white, in: RoundedRectangle(cornerRadius: 12))
                 .accessibilityElement(children: .combine)
             if model.permitted {
                 Label("Access granted to this copy of Ads Recovery", systemImage: "checkmark.circle.fill")
                     .font(Brand.text(13, .medium)).foregroundStyle(Brand.blue)
             } else {
                 Text("1. Open System Settings below.\n2. Turn on Ads Recovery and approve Touch ID or your password.\n3. Return here. We check access automatically.")
-                    .font(Brand.text(13)).lineSpacing(6)
+                    .font(Brand.text(12)).lineSpacing(4)
             }
             DisclosureGroup("App missing, or the switch is already on?") {
                 VStack(alignment: .leading, spacing: 10) {
