@@ -4,9 +4,29 @@
 
 A free macOS menu bar app by [PAD team](https://pad.team/) for the times Meta Ads Manager gets stuck on **Loading your ad account**. It recognizes that initial loading screen and can reload the page from origin.
 
-[Download 0.1.0 beta](https://github.com/grigand96-hash/ads-recovery/releases/tag/v0.1.0) · [Product page](https://pad.team/en/tools/ads-recovery/) · [Changelog](CHANGELOG.md) · [Report a bug](https://github.com/grigand96-hash/ads-recovery/issues/new?template=bug_report.yml)
+[Download for Mac](https://github.com/grigand96-hash/ads-recovery/releases/download/v0.1.0/Ads-Recovery-macOS.zip) · **[After installation: setup guide](docs/POST-INSTALL.md)** · [Product page](https://pad.team/en/tools/ads-recovery/) · [Changelog](CHANGELOG.md) · [Report a bug](https://github.com/grigand96-hash/ads-recovery/issues/new?template=bug_report.yml)
 
 macOS 14+ · Apple Silicon and Intel · English interface · Free · Open-source code
+
+## Start here
+
+1. **[Download the app](https://github.com/grigand96-hash/ads-recovery/releases/download/v0.1.0/Ads-Recovery-macOS.zip)**, double-click the ZIP, and drag **Ads Recovery.app** into **Applications**.
+2. Open it from Applications. If macOS blocks it, follow the [first-launch instructions](docs/POST-INSTALL.md#open-the-app).
+3. Follow the [setup guide](docs/POST-INSTALL.md#allow-access-to-safari), then open your Ads Manager tab in Safari.
+
+You do not need Terminal, Xcode, or a GitHub account. Download the app ZIP, not the “Source code” files on the release page.
+
+## Meta Ads Manager not loading in Safari
+
+You open Facebook Ads Manager, sign in, and wait. The page stays on **Loading your ad account**, the spinner keeps turning, and the campaign table never appears. Sometimes the same account opens in another browser while Safari remains stuck.
+
+Advertisers have reported this Safari loading problem in [this community discussion](https://www.reddit.com/r/FacebookAds/comments/1d5uvj3/ad_manager_wont_load/). The reports show a recurring symptom, but do not establish one cause or tell us how many people it affects.
+
+A blank page, a partly loaded dashboard, and an account restriction can look similar at first. Ads Recovery 0.1.0 detects the specific English loading screen. It does not automatically treat every blank or slow page as a hang.
+
+### Why does Ads Manager get stuck?
+
+The loading screen alone cannot tell you. A browser session, a failed page request, a connection problem, or a problem on Meta's side needs a different diagnosis. We have not established the underlying cause of the original Safari failure. The app gives you a way to try reloading the page and see what happens; it does not repair Meta's service or your account.
 
 ![Ads Recovery 0.1.0 welcome screen with the PAD team design and native Liquid Glass controls](docs/assets/onboarding.png)
 
@@ -27,40 +47,17 @@ This is a standalone Mac app, not a Safari extension. It stays in the menu bar a
 
 ## Download and install
 
-1. Download **Ads-Recovery-macOS.zip** from the [0.1.0 release](https://github.com/grigand96-hash/ads-recovery/releases/tag/v0.1.0).
-2. Unzip it and move **Ads Recovery.app** to **Applications**. Keep one installed copy.
-3. Open the app. Because this beta is not notarized, macOS may block the first launch. If you choose to trust this download, follow [Apple's Open Anyway instructions](https://support.apple.com/en-gb/102445) in Privacy & Security. Do not disable Gatekeeper globally.
-4. Follow **Welcome → Access → Ready**. Allow the requested macOS permission, then open Ads Manager in Safari. You can reopen these instructions with **Setup guide** in the header.
+**[Open the installation and first-run guide](docs/POST-INSTALL.md)** for step-by-step help with the download, macOS first-launch warning, Safari access, and your first recovery attempt.
 
-The release includes `SHA256SUMS.txt` to check download integrity. A matching checksum does not replace Apple notarization. Installation through the normal downloaded-file security flow on a clean Mac remains unverified.
+Already installed? Jump to [allowing access](docs/POST-INSTALL.md#allow-access-to-safari) or [fixing an access warning after an update](docs/POST-INSTALL.md#access-is-on-but-the-app-still-asks-for-it).
+
+The release includes `SHA256SUMS.txt` to check download integrity. This beta is not notarized by Apple. Installation through the normal downloaded-file security flow on a clean Mac remains unverified.
 
 ## What it can and cannot recover
 
 The current detector looks for the English initial loading message, rather than treating every slow page as broken. Manual recovery asks you to save edits first. Automatic recovery is optional and starts off: it waits 60 seconds and allows at most one attempt per 30 minutes.
 
 It will not fix Meta outages, disabled accounts, missing permissions, login challenges, network failures, or every blank-page issue. Unknown page states are left alone. The underlying cause of the original Safari loading failure has not been conclusively established.
-
-## Build
-
-Requires macOS and Apple Command Line Tools or Xcode. Use Xcode 26 or newer to include native Liquid Glass; older compilers build the material fallback. The deployment target is macOS 14. Current live testing was on Apple Silicon with macOS 27.0.1 and Safari 27.0.1; older systems and Intel hardware still need testing.
-
-```sh
-bash Scripts/build.sh
-```
-
-The script runs the detector tests, generates the icons, compiles Apple Silicon and Intel slices, packages `build/Ads Recovery.app`, and produces `build/Ads-Recovery-macOS.zip` with `build/SHA256SUMS.txt`.
-
-For an Apple Silicon-only development build:
-
-```sh
-ARCHS=arm64 bash Scripts/build.sh
-```
-
-No paid Apple Developer account is required for these builds. The app uses an **ad-hoc signature**, not an Apple Developer ID signature, and it is not notarized. A downloaded build may require explicit approval in macOS Privacy & Security. Managed Macs may disallow this. Never disable Gatekeeper globally to install this app. [Apple's explanation](https://support.apple.com/en-gb/102445).
-
-## GitHub builds
-
-The workflow runs on pushes to `main`, version tags, pull requests, and manual dispatch. It uploads a ZIP and checksum to the Actions run. It does not automatically publish a GitHub Release, modify the repository, or require signing secrets. Reviewed releases are published separately with the verified ZIP and checksum. Downloaded-build installation still needs testing on a clean Mac.
 
 ## First run
 
@@ -96,6 +93,28 @@ The event list lives in memory and contains generic status messages only. UserDe
 The light gray, ink, and blue palette follows [PAD team's website](https://pad.team/) and its tools section. The app uses the macOS system font rather than redistributing the website's Suisse Intl font. On macOS 26 and newer, the header, footer, and action buttons use native Liquid Glass. Older systems use a material fallback. Reduce Transparency uses solid surfaces. The application and menu icons are drawn from code in `Scripts/GenerateIcons.swift`.
 
 Source code: MIT. PAD team branding and mascot are excluded from that license. The project contains no HAR files, browser profiles, or private account diagnostics.
+
+## Build
+
+Requires macOS and Apple Command Line Tools or Xcode. Use Xcode 26 or newer to include native Liquid Glass; older compilers build the material fallback. The deployment target is macOS 14. Current live testing was on Apple Silicon with macOS 27.0.1 and Safari 27.0.1; older systems and Intel hardware still need testing.
+
+```sh
+bash Scripts/build.sh
+```
+
+The script runs the detector tests, generates the icons, compiles Apple Silicon and Intel slices, packages `build/Ads Recovery.app`, and produces `build/Ads-Recovery-macOS.zip` with `build/SHA256SUMS.txt`.
+
+For an Apple Silicon-only development build:
+
+```sh
+ARCHS=arm64 bash Scripts/build.sh
+```
+
+No paid Apple Developer account is required for these builds. The app uses an **ad-hoc signature**, not an Apple Developer ID signature, and it is not notarized. A downloaded build may require explicit approval in macOS Privacy & Security. Managed Macs may disallow this. Never disable Gatekeeper globally to install this app. [Apple's explanation](https://support.apple.com/en-gb/102445).
+
+## GitHub builds
+
+The workflow runs on pushes to `main`, version tags, pull requests, and manual dispatch. It uploads a ZIP and checksum to the Actions run. It does not automatically publish a GitHub Release, modify the repository, or require signing secrets. Reviewed releases are published separately with the verified ZIP and checksum. Downloaded-build installation still needs testing on a clean Mac.
 
 ## Versions
 
