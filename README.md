@@ -4,13 +4,13 @@
 
 A free macOS menu bar app by [PAD team](https://pad.team/) for the times Meta Ads Manager gets stuck on **Loading your ad account**. It recognizes that initial loading screen and can reload the page from origin.
 
-[Download for Mac](https://github.com/grigand96-hash/ads-recovery/releases/download/v0.1.1/Ads-Recovery-macOS.dmg) · **[After installation: setup guide](docs/POST-INSTALL.md)** · [Product page](https://pad.team/en/tools/ads-recovery/) · [Changelog](CHANGELOG.md) · [Report a bug](https://github.com/grigand96-hash/ads-recovery/issues/new?template=bug_report.yml)
+[Download for Mac](https://github.com/grigand96-hash/ads-recovery/releases/download/v0.1.2/Ads-Recovery-macOS.dmg) · **[After installation: setup guide](docs/POST-INSTALL.md)** · [Product page](https://pad.team/en/tools/ads-recovery/) · [Changelog](CHANGELOG.md) · [Report a bug](https://github.com/grigand96-hash/ads-recovery/issues/new?template=bug_report.yml)
 
 macOS 14+ · Apple Silicon and Intel · English interface · Free · Open-source code
 
 ## Start here
 
-1. **[Download the app](https://github.com/grigand96-hash/ads-recovery/releases/download/v0.1.1/Ads-Recovery-macOS.dmg)**, open the DMG, and drag **Ads Recovery.app** into **Applications**.
+1. **[Download the app](https://github.com/grigand96-hash/ads-recovery/releases/download/v0.1.2/Ads-Recovery-macOS.dmg)**, open the DMG, and drag **Ads Recovery.app** into **Applications**.
 2. Open it from Applications. If macOS blocks it, follow the [first-launch instructions](docs/POST-INSTALL.md#open-the-app).
 3. Follow the [setup guide](docs/POST-INSTALL.md#allow-access-to-safari), then open your Ads Manager tab in Safari.
 
@@ -122,7 +122,7 @@ The workflow runs on pushes to `main`, version tags, pull requests, and manual d
 
 ## Versions
 
-The current public beta is **0.1.1**. The first public release was 0.1.0. `VERSION` is the source of truth for the app and build number. Update it with `CHANGELOG.md` for each release, then tag the same commit as `v0.1.1` (or the next version). Tag builds fail if the tag does not match `VERSION`. Patch versions cover fixes, minor versions add features, and 1.0 is reserved for a tested stable release.
+The current public beta is **0.1.2**. The first public release was 0.1.0. `VERSION` is the source of truth for the app and build number. Update it with `CHANGELOG.md` for each release, then tag the same commit as `v0.1.1` (or the next version). Tag builds fail if the tag does not match `VERSION`. Patch versions cover fixes, minor versions add features, and 1.0 is reserved for a tested stable release.
 
 See `Server/README.md` for operating the separate diagnostic receiver.
 

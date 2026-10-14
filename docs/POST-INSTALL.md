@@ -1,6 +1,6 @@
 # Install and set up Ads Recovery on your Mac
 
-[Download Ads Recovery 0.1.1](https://github.com/grigand96-hash/ads-recovery/releases/download/v0.1.1/Ads-Recovery-macOS.dmg) · [About the app](../README.md) · [Website guide](https://pad.team/en/tools/ads-recovery/#setup)
+[Download Ads Recovery 0.1.2](https://github.com/grigand96-hash/ads-recovery/releases/download/v0.1.2/Ads-Recovery-macOS.dmg) · [About the app](../README.md) · [Website guide](https://pad.team/en/tools/ads-recovery/#setup)
 
 You need a Mac running macOS 14 or later and Safari. The download includes both Apple Silicon and Intel versions. No Terminal commands, developer tools, or GitHub account are needed.
 
@@ -8,7 +8,7 @@ Already moved the app to Applications? Start with [Open the app](#open-the-app).
 
 ## Download and move to Applications
 
-1. Click **Download Ads Recovery 0.1.1** above. Open **Ads-Recovery-macOS.dmg** from Downloads.
+1. Click **Download Ads Recovery 0.1.2** above. Open **Ads-Recovery-macOS.dmg** from Downloads.
 2. In the installer window, drag the **Ads Recovery** icon onto the **Applications** folder beside it.
 3. Wait for the copy to finish. Open **Applications** in Finder, then open **Ads Recovery** there.
 4. Eject the Ads Recovery disk image from Finder when you are done. Keep one installed copy.
@@ -82,4 +82,4 @@ The current detector recognizes the English **Loading your ad account** message.
 
 [Report a problem on GitHub](https://github.com/grigand96-hash/ads-recovery/issues/new?template=bug_report.yml). Include your app, macOS, and Safari versions and the status you saw. Leave out account IDs, campaign data, cookies, credentials, browser profiles, and HAR files.
 
-Version 0.1.1 is an experimental beta. Intel, older macOS versions, and the downloaded-file security flow on a clean Mac still need testing. Ads Recovery is an independent PAD team app, with no affiliation to Meta or Apple.
+Version 0.1.2 is an experimental beta. Intel, older macOS versions, and the downloaded-file security flow on a clean Mac still need testing. Ads Recovery is an independent PAD team app, with no affiliation to Meta or Apple.

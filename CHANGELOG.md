@@ -5,7 +5,7 @@
 - Recognize the loading label with a final period or ellipsis, including the current “Loading your ad account.” screen. Version 0.1.1 treated this screen as unknown and refused recovery.
 - Keep the existing complete-scan, unsafe-input, and reload timing checks.
 
-This fixes detection of the loading screen. It does not establish that a reload will resolve every Safari loading failure.
+The installed 0.1.2 app recognized a live hang and detected the campaign table after manual recovery. This fixes detection of the loading screen. It does not establish that a reload will resolve every Safari loading failure.
 
 ## 0.1.1 · 2026-10-10
 
