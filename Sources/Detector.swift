@@ -8,6 +8,14 @@ func isAdsManager(_ text: String) -> Bool {
     return u.path == "/adsmanager" || u.path.hasPrefix("/adsmanager/")
 }
 
+// Meta renders the same loading label with a period or an ellipsis.
+// Match the entire label so unrelated text cannot authorize a reload.
+func isLoadingLabel(_ text: String) -> Bool {
+    let label = text.split(whereSeparator: { $0.isWhitespace }).joined(separator: " ")
+    return ["Loading your ad account", "Loading your ad account.",
+            "Loading your ad account...", "Loading your ad account…"].contains(label)
+}
+
 struct LoadingGate {
     var identity: String?
     var started: TimeInterval?

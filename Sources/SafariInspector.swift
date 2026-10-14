@@ -60,7 +60,7 @@ func inspect() -> Snapshot {
         if ["AXButton", "AXCheckBox", "AXPopUpButton"].contains(role) { controls = true }
         if role == "AXStaticText" || role == "AXHeading" {
             let parts = [string(e, "AXValue"), string(e, "AXTitle"), string(e, "AXDescription")]
-            loading = loading || parts.contains { $0.trimmingCharacters(in: .whitespacesAndNewlines) == "Loading your ad account" }
+            loading = loading || parts.contains(where: isLoadingLabel)
         }
         let descendants = children(e)
         if descendants.count > 60 { truncated = true }

@@ -4,6 +4,12 @@ import Foundation
     static func main() {
         assert(isAdsManager("https://adsmanager.facebook.com/adsmanager/manage/campaigns?act=example"))
         for url in ["http://adsmanager.facebook.com/adsmanager/", "https://adsmanager.facebook.com.evil.test/adsmanager/", "https://facebook.com/", "https://www.facebook.com/adsmanager-spoof"] { assert(!isAdsManager(url)) }
+        for label in ["Loading your ad account", "Loading your ad account.", "Loading your ad account...", "Loading your ad account…", " \nLoading  your ad\u{00a0}account. "] {
+            assert(isLoadingLabel(label), "Expected loading label: \(label)")
+        }
+        for label in ["", "Loading your ad account failed", "Not Loading your ad account.", "Loading your ad account. Save changes?", "Loading your ad accounts."] {
+            assert(!isLoadingLabel(label), "Unexpected loading label: \(label)")
+        }
         var g = LoadingGate()
         for t in stride(from: 10000.0, through: 10055, by: 5) { assert(!g.observe(.loading, key: "A", now: t)) }
         assert(g.observe(.loading, key: "A", now: 10060))
