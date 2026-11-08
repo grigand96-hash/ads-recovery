@@ -19,7 +19,7 @@ final class RecoveryModel: ObservableObject {
     @Published var milliseconds = 0
     @Published var checks = 0
     @Published var attempts = 0
-    @Published var working = false
+    @Published private(set) var manualRecoveryInProgress = false
     @Published var events: [ActivityEntry] = []
     @Published var notice: String?
     let diagnostics = Diagnostics()
@@ -115,26 +115,62 @@ final class RecoveryModel: ObservableObject {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) { self.scan() }
     }
     func recoverManually() {
+        guard !manualRecoveryInProgress else { return }
         refreshPermission()
         guard permitted else { notice = "Allow interface access in macOS settings first."; return }
         guard let safari = NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.Safari").first else { notice = "Open Ads Manager in Safari first."; return }
-        safari.activate(options: [])
+        manualRecoveryInProgress = true
+        title = "Checking Safari before reload"
+        detail = "Keep the Ads Manager tab selected while we check it."
         log("Manual reload requested")
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { self.scan(manual: true) }
+        onUpdate?()
+        safari.activate(options: [])
+        let pid = safari.processIdentifier
+        let deadline = ProcessInfo.processInfo.systemUptime + 3
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { [weak self] in
+            self?.waitForSafari(pid: pid, deadline: deadline)
+        }
     }
-    func scan(manual: Bool = false) {
-        guard !inFlight else {
-            if manual { notice = "A check is already running. Try again in a few seconds." }
+
+    private func waitForSafari(pid: pid_t, deadline: TimeInterval) {
+        let active = NSWorkspace.shared.frontmostApplication?.processIdentifier == pid
+        if active && !inFlight {
+            scan(manual: true)
+        } else if ProcessInfo.processInfo.systemUptime < deadline {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+                self?.waitForSafari(pid: pid, deadline: deadline)
+            }
+        } else {
+            cancelManualReload(active ? "The Safari check timed out. Try again." : "Switch to the Ads Manager tab in Safari and try again.")
+        }
+    }
+
+    private func cancelManualReload(_ reason: String) {
+        manualRecoveryInProgress = false
+        title = "Reload cancelled"
+        detail = reason
+        log("Reload cancelled. \(reason)")
+        onUpdate?()
+    }
+
+    private func scan(manual: Bool = false) {
+        guard !inFlight, manual || (monitoring && !manualRecoveryInProgress) else { return }
+        guard AXIsProcessTrusted() else {
+            refreshPermission()
+            if manual { cancelManualReload("Allow interface access in macOS settings, then try again.") }
             return
         }
-        guard AXIsProcessTrusted(), manual || monitoring else { refreshPermission(); return }
-        inFlight = true; working = true
+        inFlight = true
         let revision = generation
         worker.async {
             let snapshot = inspect()
             DispatchQueue.main.async {
-                self.inFlight = false; self.working = false
-                guard revision == self.generation else { return }
+                self.inFlight = false
+                guard revision == self.generation else {
+                    if manual { self.cancelManualReload("The Safari check was interrupted. Select Ads Manager and try again.") }
+                    return
+                }
+                if !manual && self.manualRecoveryInProgress { return }
                 self.process(snapshot, manual: manual)
             }
         }
@@ -160,9 +196,10 @@ final class RecoveryModel: ObservableObject {
         case .unknown:
             title = "Check the page"; detail = "The page state is unclear. Automatic reload is disabled for this check."
         }
-        if changed && s.state != .outside { log(title) }
+        var awaitingInterface = false
         if let pending = pendingRecovery {
-            if pending.url == s.url && pending.pid == s.pid && s.state == .interfaceReady {
+            let samePage = pending.url == s.url && pending.pid == s.pid
+            if samePage && s.state == .interfaceReady {
                 diagnostics.record(.interfaceAppeared, state: s.state, method: pending.method, milliseconds: Int(Date().timeIntervalSince(pending.date) * 1000))
                 log("Ads Manager interface appeared after reload")
                 pendingRecovery = nil
@@ -170,12 +207,26 @@ final class RecoveryModel: ObservableObject {
                 diagnostics.record(.outcomeUnknown, state: s.state, method: pending.method)
                 log("Reload result could not be confirmed")
                 pendingRecovery = nil
+            } else if samePage {
+                awaitingInterface = true
+                title = "Waiting for Ads Manager after reload"
+                detail = "Reload command sent to Safari. Keep this tab selected while Ads Manager loads."
             }
         }
+        if changed && s.state != .outside && !awaitingInterface { log(title) }
         onUpdate?()
         let due = gate.observe(s.state, key: "\(s.pid):\(s.url)", now: Date.timeIntervalSinceReferenceDate)
-        guard (automatic && monitoring && due) || (manual && [.interfaceReady, .loading].contains(s.state)) else {
-            if manual { diagnostics.record(.reloadCancelled, state: s.state, method: .manual); notice = "Reload cancelled: open Ads Manager, finish editing, and close any dialogs." }
+        let canReloadManually = s.state == .interfaceReady || s.state == .loading
+        let shouldReload = manual ? canReloadManually : (automatic && monitoring && due)
+        guard shouldReload else {
+            if manual {
+                diagnostics.record(.reloadCancelled, state: s.state, method: .manual)
+                switch s.state {
+                case .outside: cancelManualReload("Select the Ads Manager tab in Safari and try again.")
+                case .unsafe: cancelManualReload("Finish editing and close any dialogs in Safari, then try again.")
+                default: cancelManualReload("Wait for the page to settle, then try again.")
+                }
+            }
             return
         }
         if !manual {
@@ -184,25 +235,29 @@ final class RecoveryModel: ObservableObject {
             }.min() ?? 0
             guard idle >= 10 else { return }
         }
-        inFlight = true; working = true
+        inFlight = true
         let revision = generation
         worker.async {
             let fresh = inspect()
             DispatchQueue.main.async {
-                self.inFlight = false; self.working = false
+                self.inFlight = false
                 guard revision == self.generation,
-                      manual || (self.monitoring && self.automatic), AXIsProcessTrusted(),
+                      manual || (self.monitoring && self.automatic && !self.manualRecoveryInProgress), AXIsProcessTrusted(),
                       fresh.pid == s.pid, fresh.url == s.url,
                       let w = s.window, let w2 = fresh.window, CFEqual(w, w2),
                       let web = s.web, let web2 = fresh.web, CFEqual(web, web2),
                       fresh.state == s.state,
                       NSWorkspace.shared.frontmostApplication?.processIdentifier == s.pid else {
                     self.diagnostics.record(.reloadCancelled, state: fresh.state, method: manual ? .manual : .automatic)
-                    self.log("Reload cancelled: the tab state changed")
+                    if manual { self.cancelManualReload("The Safari tab or its state changed. Select Ads Manager and try again.") }
+                    else if !self.manualRecoveryInProgress { self.log("Reload cancelled: the tab state changed") }
                     return
                 }
                 guard let down = CGEvent(keyboardEventSource: nil, virtualKey: 15, keyDown: true),
-                      let up = CGEvent(keyboardEventSource: nil, virtualKey: 15, keyDown: false) else { return }
+                      let up = CGEvent(keyboardEventSource: nil, virtualKey: 15, keyDown: false) else {
+                    if manual { self.cancelManualReload("Could not send the reload command. Try again in Safari.") }
+                    return
+                }
                 down.flags = [.maskCommand, .maskAlternate]; up.flags = [.maskCommand, .maskAlternate]
                 down.postToPid(s.pid); up.postToPid(s.pid)
                 self.attempts += 1
@@ -210,6 +265,7 @@ final class RecoveryModel: ObservableObject {
                 self.diagnostics.record(.reloadSent, state: s.state, method: manual ? .manual : .automatic)
                 self.gate.attempted(now: Date.timeIntervalSinceReferenceDate)
                 UserDefaults.standard.set(self.gate.lastAttempt, forKey: "lastRecovery")
+                if manual { self.manualRecoveryInProgress = false }
                 self.title = "Reloading Ads Manager"
                 self.detail = "Reload from origin requested. Waiting for the interface."
                 self.log(manual ? "Manual reload sent" : "Automatic reload sent")

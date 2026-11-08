@@ -284,7 +284,7 @@ struct DashboardView: View {
                         if model.permitted { model.openAdsManager() } else { model.requestPermission() }
                     }.buttonStyle(ActionStyle())
                     if model.permitted {
-                        Button("Recover Ads Manager…") { confirmReload = true }.buttonStyle(ActionStyle(primary: false)).disabled(model.working)
+                        Button("Recover Ads Manager…") { confirmReload = true }.buttonStyle(ActionStyle(primary: false)).disabled(model.manualRecoveryInProgress)
                     } else {
                         Button("Check access") { model.activate() }.buttonStyle(ActionStyle(primary: false))
                     }

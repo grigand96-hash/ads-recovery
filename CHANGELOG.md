@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.3 · 2026-11-08
+
+- Manual recovery waits for a background Safari check to finish before inspecting the active tab.
+- The app shows why it cancelled a manual reload and keeps the waiting status visible while Ads Manager loads.
+
 ## 0.1.2 · 2026-10-14
 
 - Recognize the loading label with a final period or ellipsis, including the current “Loading your ad account.” screen. Version 0.1.1 treated this screen as unknown and refused recovery.
