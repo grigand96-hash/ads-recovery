@@ -1,6 +1,6 @@
 # Install and set up Ads Recovery on your Mac
 
-[Download Ads Recovery 0.1.3](https://github.com/grigand96-hash/ads-recovery/releases/download/v0.1.3/Ads-Recovery-macOS.dmg) · [About the app](../README.md) · [Website guide](https://pad.team/en/tools/ads-recovery/#setup)
+[Download Ads Recovery 0.1.3](https://pad.team/en/tools/ads-recovery/downloads/0.1.3/Ads-Recovery-macOS.dmg) · [About the app](../README.md) · [Website guide](https://pad.team/en/tools/ads-recovery/#setup)
 
 You need a Mac running macOS 14 or later and Safari. The download includes both Apple Silicon and Intel versions. No Terminal commands, developer tools, or GitHub account are needed.
 
