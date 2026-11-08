@@ -33,6 +33,10 @@ jobs:
           architectures=$(lipo -archs 'build/Ads Recovery.app/Contents/MacOS/AdsRecovery')
           [[ " $architectures " == *" arm64 "* ]]
           [[ " $architectures " == *" x86_64 "* ]]
+          mountpoint=$(mktemp -d)
+          hdiutil attach -readonly -nobrowse -mountpoint "$mountpoint" build/Ads-Recovery-macOS.dmg
+          trap 'hdiutil detach "$mountpoint"; rmdir "$mountpoint"' EXIT
+          codesign --verify --strict "$mountpoint/Ads Recovery.app"
       - name: Upload app and checksum
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:

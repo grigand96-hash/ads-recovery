@@ -4,6 +4,7 @@
 
 - Manual recovery waits for a background Safari check to finish before inspecting the active tab.
 - The app shows why it cancelled a manual reload and keeps the waiting status visible while Ads Manager loads.
+- The DMG installer preserves the app bundle for strict macOS signature verification.
 
 ## 0.1.2 · 2026-10-14
 

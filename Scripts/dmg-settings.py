@@ -17,4 +17,3 @@ show_toolbar = False
 show_sidebar = False
 show_tab_view = False
 show_pathbar = False
-hide_extensions = ['Ads Recovery.app']
