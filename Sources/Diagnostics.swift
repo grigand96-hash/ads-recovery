@@ -23,7 +23,8 @@ struct DiagnosticBuffer {
     mutating func setEnabled(_ value: Bool) { enabled = value; if !value { events.removeAll() } }
     mutating func record(_ kind: DiagnosticKind, state: PageState, method: RecoveryMethod = .none, milliseconds: Int = 0) {
         guard enabled else { return }
-        events.append(DiagnosticEvent(kind: kind, state: state.rawValue, method: method, milliseconds: min(120000, max(0, milliseconds))))
+        let reportedState = state == .blank ? PageState.unknown : state
+        events.append(DiagnosticEvent(kind: kind, state: reportedState.rawValue, method: method, milliseconds: min(120000, max(0, milliseconds))))
         if events.count > 50 { events.removeFirst(events.count - 50) }
     }
     mutating func take() -> [DiagnosticEvent] { defer { events.removeAll() }; return enabled ? events : [] }

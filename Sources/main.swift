@@ -20,9 +20,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(stateItem); menu.addItem(.separator())
         let open = NSMenuItem(title: "Open Ads Recovery…", action: #selector(showWindow), keyEquivalent: "")
         let ads = NSMenuItem(title: "Open Ads Manager", action: #selector(openAds), keyEquivalent: "")
+        let refresh = NSMenuItem(title: "Refresh Current Tab", action: #selector(refreshCurrentTab), keyEquivalent: "")
         let agency = NSMenuItem(title: "About PAD team ↗", action: #selector(openAgency), keyEquivalent: "")
         let quit = NSMenuItem(title: "Quit Ads Recovery", action: #selector(quit), keyEquivalent: "q")
-        for item in [open, ads, pauseItem, agency, quit] { item.target = self; menu.addItem(item) }
+        for item in [open, ads, refresh, pauseItem, agency, quit] { item.target = self; menu.addItem(item) }
         status.menu = menu
         model.onUpdate = { [weak self] in
             guard let self else { return }
@@ -51,6 +52,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func showWindow() { window.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true); model.activate() }
     @objc func togglePause() { model.setMonitoring(!model.monitoring) }
     @objc func openAds() { model.openAdsManager() }
+    @objc func refreshCurrentTab() {
+        model.recoverManually()
+        if model.notice != nil { showWindow() }
+    }
     @objc func openAgency() { NSWorkspace.shared.open(URL(string: "https://pad.team/")!) }
     @objc func quit() { NSApp.terminate(nil) }
 }

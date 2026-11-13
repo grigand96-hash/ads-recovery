@@ -251,9 +251,9 @@ struct OnboardingView: View {
             Text(model.permitted ? "Open your Ads Manager tab" : "Safari access is still needed").font(Brand.text(33)).tracking(-0.9).fixedSize(horizontal: false, vertical: true)
             HelpRow(symbol: "menubar.rectangle", title: "Ads Recovery stays in your menu bar", detail: "Close this window. Click the circular arrow icon whenever you need settings or a manual reload.")
             HelpRow(symbol: "hand.raised", title: "Start by observing", detail: "Automatic recovery is off. You can enable it separately when you are ready to try the experimental mode.")
-            HelpRow(symbol: "safari", title: "Keep Safari in front", detail: "Open Ads Manager below and leave its tab selected. If it loads normally, there is nothing to recover. Save your edits before using Recover Ads Manager… from the app window.")
+            HelpRow(symbol: "safari", title: "Keep Safari in front", detail: "Open Ads Manager below and leave its tab selected. If it gets stuck, use Refresh Current Tab from the menu bar or app window.")
             PrivacyView(diagnostics: model.diagnostics)
-            Text("Only the English “Loading your ad account” screen is recognized. This cannot fix every Meta issue.")
+            Text("Refresh Current Tab reloads Ads Manager from the server. Save any edits before refreshing.")
                 .font(Brand.text(12)).foregroundStyle(Brand.muted).lineSpacing(3)
         }
     }
@@ -284,7 +284,7 @@ struct DashboardView: View {
                         if model.permitted { model.openAdsManager() } else { model.requestPermission() }
                     }.buttonStyle(ActionStyle())
                     if model.permitted {
-                        Button("Recover Ads Manager…") { confirmReload = true }.buttonStyle(ActionStyle(primary: false)).disabled(model.manualRecoveryInProgress)
+                        Button("Refresh Current Tab") { confirmReload = true }.buttonStyle(ActionStyle(primary: false)).disabled(model.manualRecoveryInProgress)
                     } else {
                         Button("Check access") { model.activate() }.buttonStyle(ActionStyle(primary: false))
                     }
@@ -315,9 +315,9 @@ struct DashboardView: View {
                 PrivacyView(diagnostics: model.diagnostics)
                 DisclosureGroup("How it works and check details", isExpanded: $showDetails) {
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("The known loading screen is observed for 60 seconds. Input fields, dialogs, or an unknown state prevent a reload. A visible interface does not confirm that all campaign data has loaded.")
+                        Text("Automatic recovery waits 60 seconds on a supported loading screen or a blank page after an account switch. Save any edits before refreshing manually.")
                         Text("This session: \(model.checks) checks, \(model.attempts) reload commands. Last check: \(model.milliseconds) ms.")
-                        Text("Activity stays in memory until you quit. Only setup completion, diagnostic consent, and the last recovery time are saved. Automatic recovery is off at every launch.")
+                        Text("Activity stays in memory until you quit. Setup completion and diagnostic consent are saved. Automatic recovery is off at every launch.")
                         HStack(spacing: 18) {
                             Button("Check now") { model.inspectNow() }
                             Button("Show introduction again", action: showSetup)
@@ -330,13 +330,13 @@ struct DashboardView: View {
             Button("Cancel", role: .cancel) { }
             Button("Reload") { model.recoverManually() }
         } message: {
-            Text("Save your ad edits first. The app will switch to Safari, check the active tab, and reload Ads Manager from origin.")
+            Text("Save your ad edits first. The app will switch to Safari, check the active tab, and reload Ads Manager from the server.")
         }
         .alert("Enable automatic recovery?", isPresented: $confirmAuto) {
             Button("Not now", role: .cancel) { }
             Button("Enable") { model.setAutomatic(true) }
         } message: {
-            Text("This mode is experimental. It recognizes only the English “Loading your ad account” screen, waits 60 seconds, and allows one attempt every 30 minutes. The full recovery sequence has not yet been verified on another real hang.")
+            Text("Automatic recovery is experimental. It waits 60 seconds on a supported loading screen or a blank page after an account switch. Each account gets at most one attempt every 30 minutes.")
         }
     }
     private func setting(title: String, subtitle: String, value: Binding<Bool>) -> some View {

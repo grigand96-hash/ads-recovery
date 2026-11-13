@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.0 · 2026-11-13
+
+- Refresh Current Tab in the menu bar and app window reloads the selected Ads Manager tab from the server, even when the page is blank.
+- Automatic recovery also recognizes a blank page or “Launching Ads Manager…” after an account switch. A reload in one account no longer delays recovery in another.
+
 ## 0.1.3 · 2026-11-08
 
 - Manual recovery waits for a background Safari check to finish before inspecting the active tab.

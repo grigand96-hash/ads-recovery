@@ -35,7 +35,6 @@ final class RecoveryModel: ObservableObject {
     private var pendingRecovery: (url: String, pid: pid_t, date: Date, method: RecoveryMethod)?
 
     init() {
-        gate.lastAttempt = UserDefaults.standard.double(forKey: "lastRecovery")
         for name in [NSWorkspace.didActivateApplicationNotification, NSWorkspace.didWakeNotification] {
             observers.append(NSWorkspace.shared.notificationCenter.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in self?.activate() })
         }
@@ -118,7 +117,8 @@ final class RecoveryModel: ObservableObject {
         guard !manualRecoveryInProgress else { return }
         refreshPermission()
         guard permitted else { notice = "Allow interface access in macOS settings first."; return }
-        guard let safari = NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.Safari").first else { notice = "Open Ads Manager in Safari first."; return }
+        guard let safari = NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.Safari")
+            .first(where: { $0.processIdentifier > 0 }) else { notice = "Open Ads Manager in Safari first."; return }
         manualRecoveryInProgress = true
         title = "Checking Safari before reload"
         detail = "Keep the Ads Manager tab selected while we check it."
@@ -188,7 +188,10 @@ final class RecoveryModel: ObservableObject {
         case .outside:
             title = "Waiting for Ads Manager"; detail = "Only the active Ads Manager tab is checked."
         case .loading:
-            title = "Ads Manager is still loading"; detail = "Watching the initial loading screen and allowing 60 seconds."
+            title = "Ads Manager is still loading"; detail = "Automatic recovery waits for 60 seconds of loading."
+        case .blank:
+            title = "Ads Manager is blank"
+            detail = "Use Refresh Current Tab to reload Ads Manager from the server."
         case .interfaceReady:
             title = "Ads Manager interface is open"; detail = "A table was found. The app does not check whether all campaign data has loaded."
         case .unsafe:
@@ -215,16 +218,16 @@ final class RecoveryModel: ObservableObject {
         }
         if changed && s.state != .outside && !awaitingInterface { log(title) }
         onUpdate?()
-        let due = gate.observe(s.state, key: "\(s.pid):\(s.url)", now: Date.timeIntervalSinceReferenceDate)
-        let canReloadManually = s.state == .interfaceReady || s.state == .loading
-        let shouldReload = manual ? canReloadManually : (automatic && monitoring && due)
+        let account = adsAccountID(in: s.url)
+        let due = gate.observe(s.loadingForAutomaticRecovery, key: "\(s.pid):\(s.url)", account: account,
+                               now: ProcessInfo.processInfo.systemUptime)
+        let shouldReload = manual ? s.canReloadManually : (automatic && monitoring && due)
         guard shouldReload else {
             if manual {
                 diagnostics.record(.reloadCancelled, state: s.state, method: .manual)
                 switch s.state {
-                case .outside: cancelManualReload("Select the Ads Manager tab in Safari and try again.")
                 case .unsafe: cancelManualReload("Finish editing and close any dialogs in Safari, then try again.")
-                default: cancelManualReload("Wait for the page to settle, then try again.")
+                default: cancelManualReload("Select the Ads Manager tab in Safari and try again.")
                 }
             }
             return
@@ -245,8 +248,8 @@ final class RecoveryModel: ObservableObject {
                       manual || (self.monitoring && self.automatic && !self.manualRecoveryInProgress), AXIsProcessTrusted(),
                       fresh.pid == s.pid, fresh.url == s.url,
                       let w = s.window, let w2 = fresh.window, CFEqual(w, w2),
-                      let web = s.web, let web2 = fresh.web, CFEqual(web, web2),
-                      fresh.state == s.state,
+                      let target = s.reloadTarget, let freshTarget = fresh.reloadTarget, CFEqual(target, freshTarget),
+                      manual ? fresh.canReloadManually : fresh.loadingForAutomaticRecovery.isRecoverableLoading,
                       NSWorkspace.shared.frontmostApplication?.processIdentifier == s.pid else {
                     self.diagnostics.record(.reloadCancelled, state: fresh.state, method: manual ? .manual : .automatic)
                     if manual { self.cancelManualReload("The Safari tab or its state changed. Select Ads Manager and try again.") }
@@ -261,13 +264,12 @@ final class RecoveryModel: ObservableObject {
                 down.flags = [.maskCommand, .maskAlternate]; up.flags = [.maskCommand, .maskAlternate]
                 down.postToPid(s.pid); up.postToPid(s.pid)
                 self.attempts += 1
-                self.pendingRecovery = (s.url, s.pid, Date(), manual ? .manual : .automatic)
-                self.diagnostics.record(.reloadSent, state: s.state, method: manual ? .manual : .automatic)
-                self.gate.attempted(now: Date.timeIntervalSinceReferenceDate)
-                UserDefaults.standard.set(self.gate.lastAttempt, forKey: "lastRecovery")
+                if self.monitoring { self.pendingRecovery = (s.url, s.pid, Date(), manual ? .manual : .automatic) }
+                self.diagnostics.record(.reloadSent, state: fresh.state, method: manual ? .manual : .automatic)
+                self.gate.attempted(account: account, now: ProcessInfo.processInfo.systemUptime)
                 if manual { self.manualRecoveryInProgress = false }
                 self.title = "Reloading Ads Manager"
-                self.detail = "Reload from origin requested. Waiting for the interface."
+                self.detail = self.monitoring ? "Safari is reloading from the server. Waiting for the interface." : "Reload from the server requested in Safari."
                 self.log(manual ? "Manual reload sent" : "Automatic reload sent")
                 self.onUpdate?()
             }

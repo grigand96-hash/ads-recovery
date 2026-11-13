@@ -2,15 +2,15 @@
 
 # Ads Recovery for Meta Ads Manager in Safari
 
-A free macOS menu bar app by [PAD team](https://pad.team/) for the times Meta Ads Manager gets stuck on **Loading your ad account**. It recognizes that initial loading screen and can reload the page from origin.
+A free macOS menu bar app by [PAD team](https://pad.team/) for when Meta Ads Manager gets stuck in Safari. It can reload the selected Ads Manager tab from the server.
 
-[Download for Mac](https://pad.team/en/tools/ads-recovery/downloads/0.1.3/Ads-Recovery-macOS.dmg) · **[After installation: setup guide](docs/POST-INSTALL.md)** · [Product page](https://pad.team/en/tools/ads-recovery/) · [Changelog](CHANGELOG.md) · [Report a bug](https://github.com/grigand96-hash/ads-recovery/issues/new?template=bug_report.yml)
+[Download for Mac](https://pad.team/en/tools/ads-recovery/downloads/0.2.0/Ads-Recovery-macOS.dmg) · **[After installation: setup guide](docs/POST-INSTALL.md)** · [Product page](https://pad.team/en/tools/ads-recovery/) · [Changelog](CHANGELOG.md) · [Report a bug](https://github.com/grigand96-hash/ads-recovery/issues/new?template=bug_report.yml)
 
 macOS 14+ · Apple Silicon and Intel · English interface · Free · Open-source code
 
 ## Start here
 
-1. **[Download the app](https://pad.team/en/tools/ads-recovery/downloads/0.1.3/Ads-Recovery-macOS.dmg)**, open the DMG, and drag **Ads Recovery.app** into **Applications**.
+1. **[Download the app](https://pad.team/en/tools/ads-recovery/downloads/0.2.0/Ads-Recovery-macOS.dmg)**, open the DMG, and drag **Ads Recovery.app** into **Applications**.
 2. Open it from Applications. If macOS blocks it, follow the [first-launch instructions](docs/POST-INSTALL.md#open-the-app).
 3. Follow the [setup guide](docs/POST-INSTALL.md#allow-access-to-safari), then open your Ads Manager tab in Safari.
 
@@ -22,7 +22,7 @@ You open Facebook Ads Manager, sign in, and wait. The page stays on **Loading yo
 
 Advertisers have reported this Safari loading problem in [this community discussion](https://www.reddit.com/r/FacebookAds/comments/1d5uvj3/ad_manager_wont_load/). The reports show a recurring symptom, but do not establish one cause or tell us how many people it affects.
 
-A blank page, a partly loaded dashboard, and an account restriction can look similar at first. Ads Recovery detects the specific English loading screen. It does not automatically treat every blank or slow page as a hang.
+Ads Manager can also go blank after you switch accounts. Use **Refresh Current Tab** to reload the selected tab when that happens.
 
 ### Why does Ads Manager get stuck?
 
@@ -57,24 +57,24 @@ The release includes `SHA256SUMS.txt` to check download integrity. This beta is 
 
 ## What it can and cannot recover
 
-The current detector looks for the English initial loading message, rather than treating every slow page as broken. Manual recovery asks you to save edits first. Automatic recovery is optional and starts off: it waits 60 seconds and allows at most one attempt per 30 minutes.
+**Refresh Current Tab** is available in the menu bar and app window. Save any edits before using it. Automatic recovery starts off and waits 60 seconds when enabled.
 
-It will not fix Meta outages, disabled accounts, missing permissions, login challenges, network failures, or every blank-page issue. Unknown page states are left alone. The underlying cause of the original Safari loading failure has not been conclusively established.
+It will not fix Meta outages, disabled accounts, missing permissions, login challenges, network failures, or every blank-page issue. Automatic recovery requires a supported loading state. The underlying cause of the original Safari loading failure has not been conclusively established.
 
 ## First run
 
 1. Move the app to Applications, then open it and follow the introduction. **Setup guide** in the header reopens it at any time.
 2. Allow Ads Recovery under **Privacy & Security → Device Control and Data Access**. Older macOS versions call this **Accessibility**. The introduction can also be skipped to inspect the app without granting access.
 3. Open Ads Manager in Safari. The app checks only while Safari is the foreground app.
-4. Use **Recover Ads Manager…** for a manual reload after saving edits. To pause all background checks, turn off **Monitor Safari** or choose pause from the menu bar.
+4. Use **Refresh Current Tab** for a manual reload after saving edits. To pause background checks, turn off **Monitor Safari** or choose pause from the menu bar.
 
 Closing the window leaves the menu bar app running. Quit from its menu to stop it completely. Login-at-startup is not installed. Rebuilding an ad-hoc-signed app may invalidate its macOS permission; remove the old Ads Recovery permission entry and add the current build if needed, even if the old switch is still on. The setup guide includes a button to reveal the current copy in Finder. Permission changes are detected automatically.
 
 ## How automatic recovery works
 
-The detector currently supports only the English text **Loading your ad account** on an HTTPS Ads Manager URL at `adsmanager.facebook.com`, `business.facebook.com`, or `www.facebook.com`.
+The detector recognizes the English text **Loading your ad account** on a supported HTTPS Ads Manager URL. On campaign, ad set, and ad pages opened through the account selector, it also recognizes **Launching Ads Manager…** and a blank page.
 
-It requires 60 seconds of consecutive observations of that screen, a complete bounded accessibility scan with no form controls, and 10 seconds without recent typing, clicks, or scrolling. Before sending Option–Command–R, it checks the process, window, URL, page object, and state again. An automatic attempt is allowed at most once per 30 minutes across the app, including after restart.
+It requires 60 seconds of consecutive observations, a complete bounded accessibility scan with no form controls, and 10 seconds without typing, clicks, or scrolling. Before sending Option–Command–R, it checks the process, window, URL, page object, and state again. While the app is running, each account is eligible for automatic recovery once every 30 minutes.
 
 Unknown states and incomplete scans do not authorize automatic reload. A detected table means the interface appeared; it does not prove the campaign data is complete. Sending a keyboard shortcut cannot atomically target a particular Safari tab, so a small tab-switch race remains. Treat automatic mode as experimental.
 
@@ -88,7 +88,7 @@ The app keeps at most 50 pending events in memory, sends about once a minute, an
 
 Use **Privacy & diagnostics** in onboarding or the dashboard to review the fields, preview the pending JSON, and change consent. Collection begins only after consent; no earlier history is uploaded. Ingestion is unauthenticated and rate-limited, so these totals are best-effort observations, not verified product analytics or unique-user counts. An interface appearing after reload is not proof of complete ad data. A missing outcome can mean the user switched away or quit.
 
-The event list lives in memory and contains generic status messages only. UserDefaults stores onboarding completion, the diagnostic consent version, and the time of the last recovery attempt. The agency link opens pad.team in the browser only when clicked; the website has its own privacy policy.
+The event list and recovery cooldowns live in memory. The app saves onboarding completion and the diagnostic consent version. The agency link opens pad.team in the browser when clicked.
 
 ## Design
 
@@ -122,7 +122,7 @@ The workflow runs on pushes to `main`, version tags, pull requests, and manual d
 
 ## Versions
 
-The current public beta is **0.1.3**. The first public release was 0.1.0. `VERSION` is the source of truth for the app and build number. Update it with `CHANGELOG.md` for each release, then tag the same commit with the new version prefixed by `v`. Tag builds fail if the tag does not match `VERSION`. Patch versions cover fixes, minor versions add features, and 1.0 is reserved for a tested stable release.
+The current public beta is **0.2.0**. The first public release was 0.1.0. `VERSION` is the source of truth for the app and build number. Update it with `CHANGELOG.md` for each release, then tag the same commit with the new version prefixed by `v`. Tag builds fail if the tag does not match `VERSION`. Patch versions cover fixes, minor versions add features, and 1.0 is reserved for a tested stable release.
 
 See `Server/README.md` for operating the separate diagnostic receiver.
 

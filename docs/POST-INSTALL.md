@@ -1,6 +1,6 @@
 # Install and set up Ads Recovery on your Mac
 
-[Download Ads Recovery 0.1.3](https://pad.team/en/tools/ads-recovery/downloads/0.1.3/Ads-Recovery-macOS.dmg) · [About the app](../README.md) · [Website guide](https://pad.team/en/tools/ads-recovery/#setup)
+[Download Ads Recovery 0.2.0](https://pad.team/en/tools/ads-recovery/downloads/0.2.0/Ads-Recovery-macOS.dmg) · [About the app](../README.md) · [Website guide](https://pad.team/en/tools/ads-recovery/#setup)
 
 You need a Mac running macOS 14 or later and Safari. The download includes both Apple Silicon and Intel versions. No Terminal commands, developer tools, or GitHub account are needed.
 
@@ -8,7 +8,7 @@ Already moved the app to Applications? Start with [Open the app](#open-the-app).
 
 ## Download and move to Applications
 
-1. Click **Download Ads Recovery 0.1.3** above. Open **Ads-Recovery-macOS.dmg** from Downloads.
+1. Click **Download Ads Recovery 0.2.0** above. Open **Ads-Recovery-macOS.dmg** from Downloads.
 2. In the installer window, drag the **Ads Recovery** icon onto the **Applications** folder beside it.
 3. Wait for the copy to finish. Open **Applications** in Finder, then open **Ads Recovery** there.
 4. Eject the Ads Recovery disk image from Finder when you are done. Keep one installed copy.
@@ -42,8 +42,8 @@ This is a broad macOS permission to read and control interfaces. Ads Recovery's 
 
 1. Open your Meta Ads Manager tab in Safari. Keep Safari at the front while the app checks the page.
 2. If Ads Manager loads normally, there is nothing to recover.
-3. If it stays on **Loading your ad account**, save any unsaved campaign edits before reloading.
-4. Open Ads Recovery from its circular-arrow icon in the macOS menu bar. Choose **Recover Ads Manager…** and confirm **Reload**.
+3. If Ads Manager gets stuck or goes blank, save any campaign edits you can still access before reloading.
+4. Click the Ads Recovery icon in the menu bar and choose **Refresh Current Tab**. The button is also available in the app window.
 5. Let the app return to Safari. Stay on that Ads Manager tab while the page reloads, then check that your campaign data has appeared.
 
 The app requests Safari's **Reload Page From Origin** command. A visible campaign table means the interface appeared; check the data yourself before continuing work. If a reload does not help, avoid repeating it indefinitely. Account restrictions, login challenges, and service outages need a different solution.
@@ -51,7 +51,7 @@ The app requests Safari's **Reload Page From Origin** command. A visible campaig
 ## Choose what runs in the background
 
 - **Monitor Safari** checks supported pages while Safari is the active app. Turn it off to pause checks.
-- **Automatic recovery** is experimental and off at every launch. If enabled, it waits for 60 seconds of the supported loading screen and attempts recovery at most once per 30 minutes. The full automatic sequence on a repeated real hang still needs testing.
+- **Automatic recovery** is experimental and off at every launch. If enabled, it waits 60 seconds on a supported loading screen or a blank page after an account switch. Each account is eligible once every 30 minutes while the app is running.
 - **Privacy & diagnostics** lets you choose whether to share technical events with PAD team. Sharing starts off. Leave it off to keep recovery local; the app works either way. [See the exact data and retention rules](../README.md#privacy).
 
 Closing the window leaves the app in the menu bar. Use its menu to quit completely. The app does not add itself to login items, so open it from Applications when you want to use it.
@@ -76,10 +76,10 @@ Click **Setup guide** at the top of the Ads Recovery window. You can revisit it 
 
 ### Ads Manager is blank or uses another language
 
-The current detector recognizes the English **Loading your ad account** message. It does not automatically recover other loading messages, unknown page states, or every blank page.
+Choose **Refresh Current Tab** to reload the selected Ads Manager tab from the server. This also works when the app cannot recognize the loading message.
 
 ### It still does not work
 
 [Report a problem on GitHub](https://github.com/grigand96-hash/ads-recovery/issues/new?template=bug_report.yml). Include your app, macOS, and Safari versions and the status you saw. Leave out account IDs, campaign data, cookies, credentials, browser profiles, and HAR files.
 
-Version 0.1.3 is an experimental beta. Intel, older macOS versions, and the downloaded-file security flow on a clean Mac still need testing. Ads Recovery is an independent PAD team app, with no affiliation to Meta or Apple.
+Version 0.2.0 is an experimental beta. Intel, older macOS versions, and the downloaded-file security flow on a clean Mac still need testing. Ads Recovery is an independent PAD team app, with no affiliation to Meta or Apple.
